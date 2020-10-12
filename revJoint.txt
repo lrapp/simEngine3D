@@ -1,0 +1,56 @@
+#Enter flags you want: i, ii, iii, iv - case senstive, must be seperated by comma
+flags:
+[
+	{
+	i,ii,iii,iv
+	}
+]
+	
+#Enter body information
+can enter either normalized or not normalized p values, if not normalized you must mark the 'Need normalized' flag 'True'
+must enter normalized p_dot values
+bodies:
+[
+	{
+	'name': 'body i'
+	'ID': 1
+	'mass': 1
+	'L':2
+	'q(x,y,z,e0,e1,e2,e3)': [8,6,-3,4,  3, -5,  1]
+	'a_bar': [-1.2,1.0,0.3]
+	'p_dot' : [-0.01391778,  0.09046557,  0.23660226,  0.96728571]
+	's_bar': [0.1,-0.3,6.0]
+	'Need normalized': True
+	'r_dot': [1,1,1]
+
+	}
+	,
+	{
+	'name': 'body j'
+	'ID': 2
+	'mass': 0
+	'q(x,y,z,e0,e1,e2,e3)': [-0.5,1.6,-6.3,0.34999598, -0.42423755,  0.54090288,  0.63635633]
+	'a_bar': [1.2,4.5,3.1]
+	'p_dot': [ 0.06292452, -0.38803456,  0.53485845, -0.74792788]
+	's_bar': [0.2,-1.0,1.5]
+	'Need normalized': False
+	'r_dot': [1,1,1]
+
+	}
+]
+
+
+#Enter constraints: CD and/or DP1 -case sensitive, must be seperated by comma, order does not matter
+constraints:
+[
+	{
+	DP1,CD
+	}
+]
+
+points:
+[
+	{
+	'c':[0.3,0.4,-6]
+	}
+]
