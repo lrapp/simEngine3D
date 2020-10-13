@@ -41,7 +41,6 @@ def phi_cd(X,C,ft):
     I=X[i_index]
     J=X[j_index]    
     
-    a_bar_i=I.a_bar
 
     A_i=I.A_rotation
     A_j=J.A_rotation

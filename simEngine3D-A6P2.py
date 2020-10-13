@@ -29,7 +29,7 @@ for i in range(0,len(X)):
         X[i].q[3:]=p_i
            
          
-X[0].q[:3,0]=np.array([0,L*np.cos(theta),-L*np.sin(theta)])
+X[1].q[:3,0]=np.array([0,L*np.cos(theta),-L*np.sin(theta)])
 
 ft=np.pi/4*np.cos(2*t)
 df=-np.pi/2*np.sin(2*t)
@@ -38,9 +38,9 @@ ddf=-np.pi*np.cos(2*t)
 phi_values=[]
 for i in constraint_list:
     if i.type.strip(" ' ") == 'CD':
-        phi_values.append(phi_cd(X,i,ft))
+        phi_values.append(phi_cd(X,i,0))
     elif i.type.strip(" ' ") == 'DP1':
-        phi_values.append(phi_dp1(X,i,ft))
+        phi_values.append(phi_dp1(X,i,0))
 
 phi_partials_values=[]
 for i in constraint_list:
