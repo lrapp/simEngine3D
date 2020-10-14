@@ -11,6 +11,7 @@ class constraint():
         self.a_bar_j= np.array([0,0,0],dtype=np.float64)
         self.s_bar_i = np.array([0,0,0],dtype=np.float64)
         self.s_bar_j = np.array([0,0,0],dtype=np.float64)
+        self.f=float()
 
 
 file="C:\\Users\\Logan\\Desktop\\simEngine3D\\input.txt"
@@ -105,6 +106,12 @@ def constraints_in():
                     for n in range(0,len(a)):
                         q[n]=float(a[n])
                         constraint_list[k].c=q           
+                if  list(i.keys())[0] == 'f':
+                    if list(i.values())[0].strip()==0:
+                        constraint_list[k].f=0
+                    else:
+                        constraint_list[k].f=list(i.values())[0].strip()
+                                                        
         start_count_index=st+1
         end_count_index=en+1                                       
 

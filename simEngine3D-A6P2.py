@@ -20,16 +20,22 @@ import numpy as np
 theta=0
 L=2
 t=0
-
+#%%
 theta=np.pi/4
+
 p_i=build_p(theta)
 
+
+cs=np.dot(np.transpose(p_i),p_i)
+print(cs)
+
+#%%
 for i in range(0,len(X)):
     if X[i].name == "body i":
         X[i].q[3:]=p_i
            
          
-X[1].q[:3,0]=np.array([0,L*np.cos(theta),-L*np.sin(theta)])
+X[0].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
 
 ft=np.pi/4*np.cos(2*t)
 df=-np.pi/2*np.sin(2*t)
@@ -52,18 +58,21 @@ for i in constraint_list:
 nue_values=[]
 for i in constraint_list:
         if i.type.strip(" ' ") == 'CD':
-            nue_values.append(CD_nue(X,i,df))
+            nue_values.append(CD_nue(X,i,0))
         if i.type.strip(" ' ") == 'DP1':
-            nue_values.append(DP1_nue(X,i,df))            
+            nue_values.append(DP1_nue(X,i,0))            
             
 gamma_values=[]
 for i in constraint_list:
         if i.type.strip(" ' ") == 'CD':
-            gamma_values.append(gamma_CD(X,i,ddf))
+            gamma_values.append(gamma_CD(X,i,0))
         if i.type.strip(" ' ") == 'DP1':
-            gamma_values.append(gamma_DP1(X,i,ddf))
+            gamma_values.append(gamma_DP1(X,i,0))
 
 print("PHI(q,t)=",str(phi_values))
-print("PHI_q=",str(phi_partials_values))
+for i in range(0,len(phi_partials_values)):
+    print("phi_qi_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][0]),str(","),str(phi_partials_values[i][1]))
+    print("phi_qj_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][2]),str(","),str(phi_partials_values[i][3]))
+    
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
