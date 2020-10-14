@@ -228,9 +228,6 @@ def DP1_PHI_partials(X,C):
     a_i_T=np.transpose(a_i)
 
 
-    a_bar_tilde_i=tilde(a_bar_i)
-
-    a_bar_tilde_j=tilde(a_bar_j)
     a_j_T=np.transpose(a_j)
     
     
