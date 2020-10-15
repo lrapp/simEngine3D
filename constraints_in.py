@@ -14,7 +14,7 @@ class constraint():
         self.f=float()
 
 
-file="C:\\Users\\Logan\\Desktop\\simEngine3D\\input.txt"
+file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint.mdl"
 
 def constraints_in():
     with open(file,'r') as f:

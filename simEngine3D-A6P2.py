@@ -16,8 +16,6 @@ constraint_list=constraints_in()
 X=data_file()
 import numpy as np
 
-#file="C:\\Users\\Logan\\Desktop\\ME-751\\HW6\\input.txt" 
-
 
 L=2
 t=0
@@ -133,7 +131,7 @@ while abs(error) > tol:
 
 #%%
 for i in range(0,len(phi_partials_values)):
-    print("phi_",constraint_list[i].type.strip(" ' "),"_",str(constraint_list[i].ID),phi_partials_values[i])
+    print("phi_qj",constraint_list[i].type.strip(" ' "),"_",str(constraint_list[i].ID),phi_partials_values[i])
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
 
