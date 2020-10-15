@@ -82,8 +82,8 @@ constraints:
 	'name': 'driving'
 	'ID': 6
 	'type: 'DP1'
-	'a_bar_i': [0,0,0]
-	'a_bar_j': [0,0,0]
+	'a_bar_i': [0,0,-1]
+	'a_bar_j': [1,0,0]
 	'f' : np.cos(np.pi/4*np.cos(2*t))
 	}
 ]

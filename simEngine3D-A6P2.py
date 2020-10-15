@@ -54,7 +54,7 @@ for i in constraint_list:
             phi_partials_values.append(CD_PHI_partials(X,i))
         if i.type.strip(" ' ") == 'DP1':
             phi_partials_values.append(DP1_PHI_partials(X,i))
- 
+            
 
            
 nue_values=[]
@@ -78,5 +78,27 @@ for i in range(0,len(phi_partials_values)):
     print("phi_qi_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][0]),str(","),str(phi_partials_values[i][1]))
     print("phi_qj_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][2]),str(","),str(phi_partials_values[i][3]))
     
+    
+#%%
+ca=np.zeros([14])
+for i in phi_partials_values:
+    ca[0:3]=i[0]
+    ca[3:7]=i[1]
+    ca[7:10]
+
+#%%
+q0=X[1].q
+phi=np.array(phi_values)    
+partials=np.array(phi_partials_values)    
+q_new=q0-phi/partials
+
+
+
+
+
+
+#%%
+   
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
+
