@@ -18,11 +18,14 @@ import numpy as np
 
 #file="C:\\Users\\Logan\\Desktop\\ME-751\\HW6\\input.txt" 
 
-theta=0
+
 L=2
 t=0
 #%%
 theta=np.pi/4
+
+#
+
 
 p_j=build_p(theta)
 X[1].A_rotation=build_A(p_j)
@@ -129,7 +132,7 @@ while abs(error) > tol:
 
 
 #%%
-print("final phi=",str(phi.T))   
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
+
 
