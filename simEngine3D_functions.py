@@ -1,3 +1,6 @@
+import numpy as np
+from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
+from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
 
 
 def build_p(theta):
@@ -39,6 +42,32 @@ def build_p(theta):
 
     return p
 
+
+def build_A(p):
+        import numpy as np
+        A=np.empty([3,3])
+
+        for k in range(0,len(A)):
+            A[k,k]=2*((p[0]**2)+(p[1]**2)-0.5)
+           
+        e0=p[0]
+        e1=p[1]
+        e2=p[2]
+        e3=p[3]
+        
+        A[0,1]=2*(e1*e2-e0*e3)
+        A[0,2]=2*(e1*e3+e0*e2)
+        
+        A[1,0]=2*(e1*e2+e0*e3)
+        A[1,2]=2*(e2*e3-e0*e1)
+        
+        A[2,0]=2*(e1*e3-e0*e2)
+        A[2,1]=2*(e2*e3+e0*e1)
+        
+        return A
+        
+        
+
 def build_A_angles(phi,theta,psi):
     import numpy as np
     A=np.zeros([3,3])    
@@ -56,3 +85,44 @@ def build_A_angles(phi,theta,psi):
     
     return A
 
+
+def calc_phi(X,cl,t):
+    phi_values=[]
+    for i in cl:
+        if i.type.strip(" ' ") == 'CD':
+            phi_values.append(phi_cd(X,i,eval(i.f)))
+        elif i.type.strip(" ' ") == 'DP1':
+            phi_values.append(phi_dp1(X,i,eval(i.f)))
+    
+        #Add euler parameter constraint
+    phi_values.append(round(float((np.dot(np.transpose(X[1].q[3:]),X[1].q[3:])-1)),12))
+    return phi_values
+
+def calc_partials(X,cl):
+    phi_partials_values=[]
+    for i in cl:
+            if i.type.strip(" ' ") == 'CD':
+                phi_partials_values.append(CD_PHI_partials(X,i))
+            if i.type.strip(" ' ") == 'DP1':
+                phi_partials_values.append(DP1_PHI_partials(X,i))
+    return phi_partials_values
+
+def build_ja(X,phi_partials_values):
+    ja_list=[]
+    for i in range(0,len(phi_partials_values)):
+        ca=np.zeros([7])
+        #order for [d_ri d_pi d_rj d_pj]
+        ca[0:3]=phi_partials_values[i][0]
+        ca[3:7]=phi_partials_values[i][1]
+    
+        ca.shape=(1,7)
+        ja_list.append(ca)
+    
+    
+    jacobian=np.zeros([7,7])
+    for i in range(0,len(ja_list)):
+        jacobian[i,:]=ja_list[i]
+        
+    #add euler parameter normalization constraint to jacobian
+    jacobian[6,3:]=2*X[1].q[3:].T
+    return jacobian

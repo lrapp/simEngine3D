@@ -237,10 +237,10 @@ def DP1_PHI_partials(X,C):
     PHI_DP1_p_i=np.dot(a_j_T,B_i)
     PHI_DP1_p_j=np.dot(a_i_T,B_j)   
     
-    PHI_DP1_r_i=0
-    PHI_DP1_r_j=0
+    PHI_DP1_r_i=np.array([0,0,0])
+    PHI_DP1_r_j=np.array([0,0,0])
     
-    return PHI_DP1_r_i, PHI_DP1_r_j,PHI_DP1_p_i[0],PHI_DP1_p_j[0]
+    return PHI_DP1_r_i,PHI_DP1_p_i,PHI_DP1_r_j,PHI_DP1_p_j
 #%%
 def CD_PHI_partials(X,C):
         #Set bodys i and j 

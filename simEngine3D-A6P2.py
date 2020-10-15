@@ -8,7 +8,7 @@ from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2
 from HW6_Q2_flags import flags_in,points_in, f_in
 
 from constraints_in import constraints_in
-from simEngine3D_functions import build_p
+from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja
 
 
 constraint_list=constraints_in()
@@ -22,10 +22,13 @@ theta=0
 L=2
 t=0
 #%%
-theta=np.pi/8
+theta=np.pi/4
 
 p_j=build_p(theta)
+X[1].A_rotation=build_A(p_j)
 
+df=np.cos(-1/2**np.pi*np.sin(2*t))
+ddf=np.cos(-np.pi*np.cos(2*t))
 #%%
 for i in range(0,len(X)):
     if X[i].name == "body j":
@@ -48,73 +51,85 @@ phi_values.append(round(float((np.dot(np.transpose(X[1].q[3:]),X[1].q[3:])-1)),1
 phi_partials_values=[]
 for i in constraint_list:
         if i.type.strip(" ' ") == 'CD':
-            phi_partials_values.append(CD_PHI_partials(X,i))
+            dri,dpi,drj,dpj=CD_PHI_partials(X,i)
+            phi_partials_values.append([drj,dpj])
         if i.type.strip(" ' ") == 'DP1':
-            phi_partials_values.append(DP1_PHI_partials(X,i))
+            dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
+            phi_partials_values.append([drj,dpj])
             
 
            
 nue_values=[]
 for i in constraint_list:
         if i.type.strip(" ' ") == 'CD':
-            nue_values.append(CD_nue(X,i,0))
+            nue_values.append(CD_nue(X,i,df))
         if i.type.strip(" ' ") == 'DP1':
-            nue_values.append(DP1_nue(X,i,0))            
+            nue_values.append(DP1_nue(X,i,df))            
             
 gamma_values=[]
 for i in constraint_list:
         if i.type.strip(" ' ") == 'CD':
-            gamma_values.append(gamma_CD(X,i,0))
+            gamma_values.append(gamma_CD(X,i,ddf))
         if i.type.strip(" ' ") == 'DP1':
-            gamma_values.append(gamma_DP1(X,i,0))
+            gamma_values.append(gamma_DP1(X,i,ddf))
 
 
 print("PHI(q,t)=",str(phi_values))
 
-for i in range(0,len(phi_partials_values)):
-    print("phi_qi_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][0]),str(","),str(phi_partials_values[i][1]))
-    print("phi_qj_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][2]),str(","),str(phi_partials_values[i][3]))
+#for i in range(0,len(phi_partials_values)):
+#    print("phi_qi_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][0]),str(","),str(phi_partials_values[i][1]))
+#    print("phi_qj_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][2]),str(","),str(phi_partials_values[i][3]))
     
     
-#%%
+#%% Assembel Jacobian
 ja_list=[]
-for i in phi_partials_values:
-    ca=np.zeros([14])
-#    ca[0:3]=i[0]
-#    ca[3:7]=i[1]
-#    ca[7:10]=i[2]
-#    ca[10:14]=i[3]
-    
-    ca[0:3]=i[0]
-    ca[6:10]=i[1]
-    ca[3:6]=i[2]
-    ca[10:14]=i[3]
+for i in range(0,len(phi_partials_values)):
+    ca=np.zeros([7])
+    #order for [d_ri d_pi d_rj d_pj]
+    ca[0:3]=phi_partials_values[i][0]
+    ca[3:7]=phi_partials_values[i][1]
+
+    ca.shape=(1,7)
     ja_list.append(ca)
 
 
-jacobian=np.zeros([7,14])
+jacobian=np.zeros([7,7])
 for i in range(0,len(ja_list)):
     jacobian[i,:]=ja_list[i]
     
 #add euler parameter normalization constraint to jacobian
-p_i=X[0].q[3:]
-jacobian[6,6:10]=2*np.transpose(p_i)
-jacobian[6,10:]=2*np.transpose(p_j)
-
+jacobian[6,3:]=2*X[1].q[3:].T
 #%%
 #Newton Raphson method
-q0=X[1].q
+q0=np.zeros([7,1])
+q0[:]=X[1].q
+
 phi=np.array(phi_values)    
+phi.shape=(7,1)
 
-q_new=q0-np.linalg.lstsq(jacobian,phi)
+error=10
+tol=1e-5
+counter=1
 
-
-
+while abs(error) > tol:
+    q_new=q0-np.linalg.lstsq(jacobian,phi)[0]
+    error = np.linalg.norm(q0-q_new)
+    
+    phi_new=[]
+    X[1].q=q_new #Assing new q to body J
+    X[1].A_rotation=build_A(q_new[3:])     #Build new rotation matrix from new p values
+    phi=np.array(calc_phi(X,constraint_list,t)) #calculate new values of phi
+    phi.shape=(7,1)
+    partials_new=calc_partials(X,constraint_list) #calculate new partials
+    jacobian=build_ja(X,partials_new) #build new jacobian
+    q0=q_new
+    counter=counter+1
+    
 
 
 
 #%%
-   
+print("final phi=",str(phi.T))   
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
 
