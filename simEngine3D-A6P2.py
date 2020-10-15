@@ -132,6 +132,8 @@ while abs(error) > tol:
 
 
 #%%
+for i in range(0,len(phi_partials_values)):
+    print("phi_",constraint_list[i].type.strip(" ' "),"_",str(constraint_list[i].ID),phi_partials_values[i])
 print("nue=",str(nue_values))
 print("gamma=",str(gamma_values))
 
