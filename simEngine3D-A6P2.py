@@ -22,7 +22,7 @@ theta=0
 L=2
 t=0
 #%%
-theta=np.pi/4
+theta=np.pi/8
 
 p_j=build_p(theta)
 
@@ -32,14 +32,8 @@ for i in range(0,len(X)):
         X[i].q[3:]=p_j
            
          
-#X[1].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
+X[1].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
 
-X[1].q[:3,0]=np.array([0,1.2,-1.2])
-
-
-ft=np.pi/4*np.cos(2*t)
-df=-np.pi/2*np.sin(2*t)
-ddf=-np.pi*np.cos(2*t)
 
 phi_values=[]
 for i in constraint_list:
@@ -86,9 +80,14 @@ for i in range(0,len(phi_partials_values)):
 ja_list=[]
 for i in phi_partials_values:
     ca=np.zeros([14])
+#    ca[0:3]=i[0]
+#    ca[3:7]=i[1]
+#    ca[7:10]=i[2]
+#    ca[10:14]=i[3]
+    
     ca[0:3]=i[0]
-    ca[3:7]=i[1]
-    ca[7:10]=i[2]
+    ca[6:10]=i[1]
+    ca[3:6]=i[2]
     ca[10:14]=i[3]
     ja_list.append(ca)
 
@@ -99,7 +98,7 @@ for i in range(0,len(ja_list)):
     
 #add euler parameter normalization constraint to jacobian
 p_i=X[0].q[3:]
-jacobian[6,3:7]=2*np.transpose(p_i)
+jacobian[6,6:10]=2*np.transpose(p_i)
 jacobian[6,10:]=2*np.transpose(p_j)
 
 #%%

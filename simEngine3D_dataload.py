@@ -29,7 +29,8 @@ def array_dot(V):
 def data_file():
 
     #File path to input file and read contents of file into memory
-    file=os.getcwd()+"\\input.txt"
+#    file=os.getcwd()+"\\input.txt"
+    file=os.getcwd()+"\\revJoint.mdl"    
     
     with open(file,'r') as f:
         contents=f.readlines()
