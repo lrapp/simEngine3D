@@ -12,6 +12,7 @@ from simEngine3D_functions import build_p
 
 
 constraint_list=constraints_in()
+
 X=data_file()
 import numpy as np
 
@@ -23,19 +24,18 @@ t=0
 #%%
 theta=np.pi/4
 
-p_i=build_p(theta)
-
-
-cs=np.dot(np.transpose(p_i),p_i)
-print(cs)
+p_j=build_p(theta)
 
 #%%
 for i in range(0,len(X)):
     if X[i].name == "body j":
-        X[i].q[3:]=p_i
+        X[i].q[3:]=p_j
            
          
-X[1].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
+#X[1].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
+
+X[1].q[:3,0]=np.array([0,1.2,-1.2])
+
 
 ft=np.pi/4*np.cos(2*t)
 df=-np.pi/2*np.sin(2*t)
@@ -47,6 +47,9 @@ for i in constraint_list:
         phi_values.append(phi_cd(X,i,eval(i.f)))
     elif i.type.strip(" ' ") == 'DP1':
         phi_values.append(phi_dp1(X,i,eval(i.f)))
+
+#Add euler parameter constraint
+phi_values.append(round(float((np.dot(np.transpose(X[1].q[3:]),X[1].q[3:])-1)),12))
 
 phi_partials_values=[]
 for i in constraint_list:
@@ -80,17 +83,31 @@ for i in range(0,len(phi_partials_values)):
     
     
 #%%
-ca=np.zeros([14])
+ja_list=[]
 for i in phi_partials_values:
+    ca=np.zeros([14])
     ca[0:3]=i[0]
     ca[3:7]=i[1]
-    ca[7:10]
+    ca[7:10]=i[2]
+    ca[10:14]=i[3]
+    ja_list.append(ca)
+
+
+jacobian=np.zeros([7,14])
+for i in range(0,len(ja_list)):
+    jacobian[i,:]=ja_list[i]
+    
+#add euler parameter normalization constraint to jacobian
+p_i=X[0].q[3:]
+jacobian[6,3:7]=2*np.transpose(p_i)
+jacobian[6,10:]=2*np.transpose(p_j)
 
 #%%
+#Newton Raphson method
 q0=X[1].q
 phi=np.array(phi_values)    
-partials=np.array(phi_partials_values)    
-q_new=q0-phi/partials
+
+q_new=q0-np.linalg.lstsq(jacobian,phi)
 
 
 
