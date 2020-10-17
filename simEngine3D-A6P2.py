@@ -23,8 +23,6 @@ t=0
 theta=np.pi/4
 
 #
-
-
 p_j=build_p(theta)
 X[1].A_rotation=build_A(p_j)
 
@@ -36,7 +34,8 @@ for i in range(0,len(X)):
         X[i].q[3:]=p_j
            
          
-X[1].q[:3,0]=np.array([0,L*np.sin(theta),-L*np.cos(theta)])
+
+X[1].q[:3,0]=np.array([0,0,0])
 
 
 phi_values=[]
