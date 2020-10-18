@@ -8,7 +8,7 @@ from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2
 from HW6_Q2_flags import flags_in,points_in, f_in
 
 from constraints_in import constraints_in
-from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja
+from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja, build_G
 
 
 constraint_list=constraints_in()

@@ -7,7 +7,7 @@ from gamma_functions import gamma_DP1,gamma_CD,gamma_DP2, gamma_D
 from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
 from HW6_Q2_flags import flags_in,points_in, f_in
 from constraints_in import constraints_in
-from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja
+from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G
 import numpy as np              
 import sympy as sym
 
@@ -35,9 +35,7 @@ def pendulum(X,constraint_list,t):
             if i.type.strip(" ' ") == 'DP1':
                 dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
                 phi_partials_values.append([drj,dpj])
-                
-    
-               
+                               
     nue_values=[]
     for i in constraint_list:
             if i.type.strip(" ' ") == 'CD':
@@ -108,6 +106,13 @@ def pendulum(X,constraint_list,t):
     
     if counter == 30:
         print("Failed to converge")
+
+    omega=df
+    p_j=X[1].q[3:]
+    E = build_G(p_j)
+    X[1].p_dot_j=0.5*np.transpose(E)*omega
+    
+     
         
     return X
 

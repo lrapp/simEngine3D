@@ -50,7 +50,28 @@ def build_A(p):
         
         return A
         
+def build_G(p):
+        e0=p[0]
+        e1=p[1]
+        e2=p[2]
+        e3=p[3]
         
+        G=np.zeros([3,4])
+        G[0,0]=-e1
+        G[0,1]=e0
+        G[0,2]=e3
+        G[0,3]=-e2
+        G[1,0]=-e2
+        G[1,1]=-e3
+        G[1,2]=e0
+        G[1,3]=e1
+        G[2,0]=-e3
+        G[2,1]=e2
+        G[2,2]=-e1
+        G[2,3]=e0
+        return G
+    
+    
 
 def build_A_angles(phi,theta,psi):
     import numpy as np

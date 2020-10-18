@@ -53,36 +53,7 @@ def DP1_nue(X,C,dft):
     A_i=I.A_rotation
     A_j=J.A_rotation
     
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    A_i_T=np.transpose(A_i)
 
-    
-    #define G and p_dot
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-    
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-
-    a_j=np.dot(J.A_rotation,J.a_bar)
-    a_i=np.dot(I.A_rotation,I.a_bar)
-    a_i_T=np.transpose(a_i)
-    
-    
-    
-    B_i=build_B(p_i,a_bar_i)
-    if a_bar_j.all()==0:
-        B_j=np.zeros([3,4])
-    else:
-        B_j=build_B(p_j,a_bar_j)
-        
-    a_dot_i=np.dot(B_i,p_dot_i)
-    a_dot_j=np.dot(B_j,p_dot_j)
-    
-    a_dot_i_T=np.transpose(a_dot_i)
-    nue=np.dot(a_dot_i_T,a_j)+np.dot(a_i_T,a_dot_j)
-    
 
     return dft
 #%%
@@ -103,26 +74,6 @@ def CD_nue(X,C,dft):
     A_i=I.A_rotation
     A_j=J.A_rotation
     
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    A_i_T=np.transpose(A_i)
-    
-    
-    a_j=np.dot(A_j,a_bar_j)
-    
-    #define  p_dot
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-
-    #r_dot and s_dot are given
-    r_dot_i=I.r_dot
-    r_dot_j=J.r_dot
-    
-    s_bar_j=C.s_bar_i
-    s_bar_i=C.s_bar_j
-
-
     return dft
 
 #%%
@@ -142,25 +93,6 @@ def DP2_nue(X,dft):
     a_bar_j=J.a_bar
     A_i=I.A_rotation
     A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    A_i_T=np.transpose(A_i)
-    
-    
-    a_j=np.dot(A_j,a_bar_j)
-    
-    #define  p_dot
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-
-    #r_dot and s_dot are given
-    r_dot_i=I.r_dot
-    r_dot_j=J.r_dot
-    
-    s_bar_j=J.s_bar
-    s_bar_i=I.s_bar
 
 
     return dft
@@ -182,24 +114,6 @@ def D_nue(X,dft):
     A_i=I.A_rotation
     A_j=J.A_rotation
     
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    A_i_T=np.transpose(A_i)
-    
-    
-    a_j=np.dot(A_j,a_bar_j)
-    
-    #define  p_dot
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-
-    #r_dot and s_dot are given
-    r_dot_i=I.r_dot
-    r_dot_j=J.r_dot
-    
-    s_bar_j=J.s_bar
-    s_bar_i=I.s_bar
 
 
     return dft
