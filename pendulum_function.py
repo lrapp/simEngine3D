@@ -13,7 +13,7 @@ import sympy as sym
 
 
 def pendulum(X,constraint_list,t):
-    
+#    f=np.cos(np.pi/4*np.cos(2*t))
     df=np.cos(-1/2**np.pi*np.sin(2*t))
     ddf=np.cos(-np.pi*np.cos(2*t))
     

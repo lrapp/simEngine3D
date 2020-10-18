@@ -40,6 +40,13 @@ for i in range(0,len(t)):
     z.append(X[1].q[2])
     X=body_list[i]
 
+plt.plot()
+plt.axis([-1.5,1.5,-2,2])
+for i in range(0,len(y)):
+    plt.plot(float(y[i]),float(z[i]),'o')
+    plt.pause(0.001)
+
+
 plt.plot(y,z)
 
 #theta_list=[]
