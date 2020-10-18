@@ -224,8 +224,8 @@ def DP1_PHI_partials(X,C):
     p_dot_i=I.p_dot
     p_dot_j=J.p_dot
 
-    a_j=np.dot(J.A_rotation,J.a_bar)
-    a_i=np.dot(I.A_rotation,I.a_bar)
+    a_j=np.dot(J.A_rotation,a_bar_j)
+    a_i=np.dot(I.A_rotation,a_bar_i)
     a_i_T=np.transpose(a_i)
 
 
@@ -276,8 +276,8 @@ def CD_PHI_partials(X,C):
     s_bar_i=C.s_bar_i
     s_bar_j=C.s_bar_j
     
-    a_j=np.dot(J.A_rotation,J.a_bar)
-    a_i=np.dot(I.A_rotation,I.a_bar)
+    a_j=np.dot(A_j,a_bar_j)
+    a_i=np.dot(A_i,a_bar_i)
     a_i_T=np.transpose(a_i)
 
 
@@ -287,10 +287,8 @@ def CD_PHI_partials(X,C):
     a_bar_tilde_j_T=np.transpose(a_bar_tilde_j)
     
     B_i=build_B(p_i,s_bar_i)
-    if s_bar_j.all()==0:
-        B_j=np.zeros([3,4])
-    else:
-        B_j=build_B(p_j,s_bar_j)
+    B_j=build_B(p_j,s_bar_j)
+    
     c=C.c
     c_T=np.transpose(c)
     
@@ -302,6 +300,7 @@ def CD_PHI_partials(X,C):
     
     return first[0], second[0], third[0], fourth[0]
 #%%
+#TO DO: read in a_bar_j and a_bar_i from constraints, not from bodies
 def DP2_PHI_partials(X):
       #Set bodys i and j 
     for i in X:
@@ -335,8 +334,8 @@ def DP2_PHI_partials(X):
     r_i=I.q[:3]
     r_j=J.q[:3]
     
-    a_j=np.dot(J.A_rotation,J.a_bar)
-    a_i=np.dot(I.A_rotation,I.a_bar)
+    a_j=np.dot(J.A_rotation,a_bar_j)
+    a_i=np.dot(I.A_rotation,a_bar_i)
     a_i_T=np.transpose(a_i)
 
 
@@ -362,6 +361,8 @@ def DP2_PHI_partials(X):
     return PHI_DP1_r_i[0], PHI_DP1_r_j[0],PHI_DP1_p_i[0],PHI_DP1_p_j[0]
 
 #%%
+#TO DO: read in a_bar_j and a_bar_i from constraints, not from bodies
+
 def D_PHI_partials(X):
       #Set bodys i and j 
     for i in X:

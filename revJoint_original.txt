@@ -37,22 +37,6 @@ bodies:
 constraints:
 [
 	{
-	'name': 'x prime and z DP1'
-	'ID': 4
-	'type': 'DP1'
-	'a_bar_i': [0,1,0]
-	'a_bar_j': [0,0,1]
-	'f': 0
-	}
-	{
-	'name': 'y prime and z DP1'
-	'ID': 5
-	'type': 'DP1'
-	'a_bar_i': [0,0,1]
-	'a_bar_j': [0,0,1]
-	'f': 0
-	}
-	{
 	'name': 'X CD'
 	'ID': 1
 	'type': 'CD'
@@ -77,6 +61,22 @@ constraints:
 	's_bar_i': [0,0,0]
 	's_bar_j': [-2,0,0]
 	'c':[0,0,1]
+	'f': 0
+	}
+	{
+	'name': 'x prime and z DP1'
+	'ID': 4
+	'type': 'DP1'
+	'a_bar_i': [0,1,0]
+	'a_bar_j': [0,0,1]
+	'f': 0
+	}
+	{
+	'name': 'y prime and z DP1'
+	'ID': 5
+	'type': 'DP1'
+	'a_bar_i': [0,0,1]
+	'a_bar_j': [0,0,1]
 	'f': 0
 	}
 	{

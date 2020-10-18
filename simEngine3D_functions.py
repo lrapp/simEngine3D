@@ -20,23 +20,7 @@ def build_p(theta):
     e1=(A[2,1]-A[1,2])/(4*e0)
     e2=(A[0,2]-A[2,0])/(4*e0)
     e3=(A[1,0]-A[0,1])/(4*e0)        
-#    if e0 != 0:       
-#        e1=(A[2,1]-A[1,2])/(4*e0)
-#        e2=(A[0,2]-A[2,0])/(4*e0)
-#        e3=(A[1,0]-A[0,1])/(4*e0)
-#    elif (1+2*A[0,0]-np.trace(A))/4 != 0:
-#        e1=np.sqrt((1+2*A[0,0]-np.trace(A))/4)
-#        e2=(A[1,0]+A[0,1])/(4*e1)
-#        e3=(A[2,0]+A[0,2])/(4*e1)
-#    elif (1+2*A[1,1]-np.trace(A))/4 !=0:
-#        e2=np.sqrt((1+2*A[1,1]-np.trace(A))/4)
-#        e1=(A[1,0]+A[0,1])/(4*e2)
-#        e3=(A[2,1]+A[1,2])/(4*e2)
-#    elif (1+2*A[2,2]-np.trace(A))/4 != 0:
-#        e3=np.sqrt((1+2*A[2,2]-np.trace(A))/4)
-#        e1=(A[2,0]+A[0,2])/(4*e3)
-#        e2=(A[2,1]+A[1,2])/(4*e3)
-             
+
     p=np.empty([4,1])
     p[:,0]=np.array([e0,e1,e2,e3])
 
@@ -46,23 +30,23 @@ def build_p(theta):
 def build_A(p):
         import numpy as np
         A=np.empty([3,3])
-
-        for k in range(0,len(A)):
-            A[k,k]=2*((p[0]**2)+(p[1]**2)-0.5)
            
         e0=p[0]
         e1=p[1]
         e2=p[2]
         e3=p[3]
         
+        A[0,0]=2*((e0**2+e1**2)-0.5)
         A[0,1]=2*(e1*e2-e0*e3)
         A[0,2]=2*(e1*e3+e0*e2)
         
         A[1,0]=2*(e1*e2+e0*e3)
+        A[1,1]=2*((e0**2+e2**2)-0.5)        
         A[1,2]=2*(e2*e3-e0*e1)
         
         A[2,0]=2*(e1*e3-e0*e2)
         A[2,1]=2*(e2*e3+e0*e1)
+        A[2,2]=2*((e0**2+e3**2)-0.5)        
         
         return A
         
@@ -102,9 +86,11 @@ def calc_partials(X,cl):
     phi_partials_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                phi_partials_values.append(CD_PHI_partials(X,i))
+                dri,dpi,drj,dpj=CD_PHI_partials(X,i)
+                phi_partials_values.append([drj,dpj])
             if i.type.strip(" ' ") == 'DP1':
-                phi_partials_values.append(DP1_PHI_partials(X,i))
+                dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
+                phi_partials_values.append([drj,dpj])    
     return phi_partials_values
 
 def build_ja(X,phi_partials_values):

@@ -23,7 +23,10 @@ t=0
 theta=np.pi/4
 
 #
-p_j=build_p(theta)
+#p_j=build_p(theta)
+#p_j=np.array([0.27059805,-0.6532815,-0.270505981,0.65328148])
+p_j=np.array([0.7,0.1,0.7,0.1])
+p_j.shape=(4,1)
 X[1].A_rotation=build_A(p_j)
 
 df=np.cos(-1/2**np.pi*np.sin(2*t))
@@ -35,8 +38,8 @@ for i in range(0,len(X)):
            
          
 
-X[1].q[:3,0]=np.array([0,0,0])
-
+X[1].q[:3,0]=np.array([0,1.4142,-1.4142])
+X[1].A_rotation=build_A(X[1].q[3:])
 
 phi_values=[]
 for i in constraint_list:
@@ -108,11 +111,14 @@ phi=np.array(phi_values)
 phi.shape=(7,1)
 
 error=10
-tol=1e-5
+tol=1e-4
 counter=1
 
-while abs(error) > tol:
-    q_new=q0-np.linalg.lstsq(jacobian,phi)[0]
+while abs(error) > tol and counter < 30:
+    print(counter)
+#    q_new=q0-np.linalg.lstsq(jacobian,phi)[0]
+    q_new=q0-np.dot(np.linalg.inv(jacobian),phi)
+#    q_new=q0-jacobian@phi
     error = np.linalg.norm(q0-q_new)
     
     phi_new=[]
@@ -124,6 +130,10 @@ while abs(error) > tol:
     jacobian=build_ja(X,partials_new) #build new jacobian
     q0=q_new
     counter=counter+1
+
+if counter == 30:
+    print("Failed to converge")
+
     
 
 

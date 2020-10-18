@@ -56,13 +56,10 @@ def phi_cd(X,C,ft):
     c_T=np.transpose(C.c)
     
     if np.count_nonzero(s_bar_j) == 0:
-        print("first")
         d_ij=(-r_i-np.dot(A_i,s_bar_i))
     elif np.count_nonzero(s_bar_i) == 0:
-        print("second")
         d_ij=(r_j+np.dot(A_j,s_bar_j))
     else:
-        print("third")
         d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
     
     PHI_CD=np.dot(c_T,d_ij)-ft
