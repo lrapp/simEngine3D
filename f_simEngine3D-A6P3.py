@@ -25,7 +25,6 @@ J_bar[1,1]=1/12*m*(L**2+c**2)
 J_bar[2,2]=1/12*m*(L**2+b**2)
 
 
-
 F=np.array([0,0,-9.81])
 F.shape=(3,1)
 
@@ -71,45 +70,72 @@ for i in range(0,len(tm)):
     p_d_dot.append(X[1].p_d_dot)
     
     #Start inverse dynamics stuff
+    ## LHS is blue stuff on left of last equation on pg 478 of 2019 lecture notes
+    ##RHS is blue stuff on right of last equation 
+    
+    phi_r=partials[:,0:3]
+    phi_p=partials[:,3:]
+    
     G=build_G(X[1].q[3:])
     J_P=4*np.dot(np.dot(np.transpose(G),J_bar),G)    
     P=np.zeros([1,4])
     P[0,:]=np.transpose(X[1].q[3:])
     
-    gamma_p=np.dot(P,X[1].p_d_dot)
+#    gamma_p=np.dot(P,X[1].p_d_dot) #slide 475
+    gamma_p=-2*np.dot(X[1].p_dot.T,X[1].p_dot) #slide 473
     gamma_values=np.array(gamma_values)
     
-    RHS=np.zeros([15,1])
-    RHS[:3,0:1]=F
-    RHS[7,0]=gamma_p
-    RHS[8:,0]=gamma_values
-     
+    G_dot=build_G(X[1].p_dot)
+    tau_hat=8*np.dot(np.dot(np.dot(G_dot.T,J_bar),G_dot),X[1].q[3:])
     
-    LHS=np.zeros([15,15])
-
-    phi_r=partials[:,0:3]
-    phi_p=partials[:,3:]
-        
-    LHS[0:3,0:3]=M
-    LHS[0:3,8:]=np.transpose(phi_r)
+    LHS=np.zeros([8,8])
+    LHS[0:3,0:7]=phi_r.T    
+    LHS[3:7,0:7]=phi_p.T
+    LHS[3:7,7:8]=P.T
+    LHS[7:,4:]=P
     
-    LHS[3:7,3:7]=J_P
-    LHS[3:7,7:8]=np.transpose(P)
-    LHS[3:7,8:]=np.transpose(phi_p)
-    
-    LHS[7,3:7]=P
+    RHS=np.zeros([8,1])
+    RHS[:3,0:1]=F-np.dot(M,X[1].r_d_dot)
+    RHS[3:7]=tau_hat-np.dot(J_P,X[1].p_d_dot)
+    RHS[7]=gamma_p
        
-    LHS[8:,0:3]=phi_r
-    LHS[8:,3:7]=phi_p
-       
-    unknowns=np.dot(np.linalg.inv(LHS),RHS)
+    unknowns=np.dot(np.linalg.inv(LHS),RHS)    
     
-    rdd=unknowns[0:3]
-    pdd=unknowns[3:7]
-    lambda_P=unknowns[7]
-    lagrange=unknowns[8:]
+    lagrange=unknowns[:7]
+    lambda_p=unknowns[7]
     
-    torque=-np.dot(np.transpose(phi_p),lagrange)
+#    RHS=np.zeros([15,1])
+#    RHS[:3,0:1]=F
+#    RHS[3:7]=tau_hat
+#    RHS[7,0]=gamma_p
+#    RHS[8:,0]=gamma_values
+#     
+#    
+#    LHS=np.zeros([15,15])
+#
+#    phi_r=partials[:,0:3]
+#    phi_p=partials[:,3:]
+#        
+#    LHS[0:3,0:3]=M
+#    LHS[0:3,8:]=np.transpose(phi_r)
+#    
+#    LHS[3:7,3:7]=J_P
+#    LHS[3:7,7:8]=np.transpose(P)
+#    LHS[3:7,8:]=np.transpose(phi_p)
+#    
+#    LHS[7,3:7]=P
+#       
+#    LHS[8:,0:3]=phi_r
+#    LHS[8:,3:7]=phi_p
+#       
+#    unknowns=np.dot(np.linalg.inv(LHS),RHS)
+#    
+#    rdd=unknowns[0:3]
+#    pdd=unknowns[3:7]
+#    lambda_P=unknowns[7]
+#    lagrange=unknowns[8:]
+#    
+    torque=-np.dot(phi_p.T,lagrange)
     torque_list.append(torque)
     
         
@@ -131,12 +157,21 @@ for i in range(0,len(tm)):
 plt.plot(y,z)
 #%%
 
-torque_plot=[]
-for i in torque_list:
-    torque_plot.append(i[2])
-    
-plt.plot(tm,torque_plot)
+torque_plot0=[]
+torque_plot1=[]
+torque_plot2=[]
+torque_plot3=[]
 
+for i in torque_list:
+    torque_plot0.append(i[0])
+    torque_plot1.append(i[1])
+    torque_plot2.append(i[2])
+    torque_plot3.append(i[3])
+    
+plt.plot(tm,torque_plot0)
+plt.plot(tm,torque_plot1)
+plt.plot(tm,torque_plot2)
+plt.plot(tm,torque_plot3)
 
 #theta_list=[]
 #for i in range(0,len(t)):
