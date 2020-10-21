@@ -4,9 +4,33 @@ from pendulum_function import pendulum
 import numpy as np
 from constraints_in import constraints_in
 from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
-from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja
+from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G
 import matplotlib.pyplot as plt
 
+L=2
+xa=0.05*0.05
+volume=xa*L
+rho=7800
+m=rho*volume
+
+M=m*np.identity(3)
+J_bar=np.zeros([3,3])
+
+b=0.05/2
+c=0.05/2
+
+
+J_bar[0,0]=1/12*m*(b**2+c**2)
+J_bar[1,1]=1/12*m*(L**2+c**2)
+J_bar[2,2]=1/12*m*(L**2+b**2)
+
+
+
+F=np.array([0,0,-9.81])
+F.shape=(3,1)
+
+tau=np.array([0,0,0])
+tau.shape=(3,1)
 
 X=data_file()
 constraint_list=constraints_in()
@@ -23,6 +47,8 @@ X[1].q[:3,0]=np.array([0,1,-0.5])
 
 tm=np.arange(0,10,0.01)
 body_list=[]
+partial_list=[]
+torque_list=[]
 y=[]
 z=[]
 x=[]
@@ -32,9 +58,9 @@ p_dot=[]
 p_d_dot=[]
 for i in range(0,len(tm)):
     time=tm[i]
- 
     X[1].A_rotation=build_A(X[1].q[3:])
-    n=pendulum(X,constraint_list,time)
+    n,partials,gamma_values=pendulum(X,constraint_list,time)
+    partial_list.append(partials)
     body_list.append(n)
     x.append(X[1].q[0])
     y.append(X[1].q[1])
@@ -43,10 +69,57 @@ for i in range(0,len(tm)):
     r_d_dot.append(X[1].r_d_dot)    
     p_dot.append(X[1].p_dot)
     p_d_dot.append(X[1].p_d_dot)
-
-    X=body_list[i]
     
+    #Start inverse dynamics stuff
+    G=build_G(X[1].q[3:])
+    J_P=4*np.dot(np.dot(np.transpose(G),J_bar),G)    
+    P=np.zeros([1,4])
+    P[0,:]=np.transpose(X[1].q[3:])
+    
+    gamma_p=np.dot(P,X[1].p_d_dot)
+    gamma_values=np.array(gamma_values)
+    
+    RHS=np.zeros([15,1])
+    RHS[:3,0:1]=F
+    RHS[7,0]=gamma_p
+    RHS[8:,0]=gamma_values
+     
+    
+    LHS=np.zeros([15,15])
 
+    phi_r=partials[:,0:3]
+    phi_p=partials[:,3:]
+        
+    LHS[0:3,0:3]=M
+    LHS[0:3,8:]=np.transpose(phi_r)
+    
+    LHS[3:7,3:7]=J_P
+    LHS[3:7,7:8]=np.transpose(P)
+    LHS[3:7,8:]=np.transpose(phi_p)
+    
+    LHS[7,3:7]=P
+       
+    LHS[8:,0:3]=phi_r
+    LHS[8:,3:7]=phi_p
+       
+    unknowns=np.dot(np.linalg.inv(LHS),RHS)
+    
+    rdd=unknowns[0:3]
+    pdd=unknowns[3:7]
+    lambda_P=unknowns[7]
+    lagrange=unknowns[8:]
+    
+    torque=-np.dot(np.transpose(phi_p),lagrange)
+    torque_list.append(torque)
+    
+        
+    X=body_list[i]
+
+
+
+
+    
+#%%
 
 #plt.plot()
 #plt.axis([-1.5,1.5,-2,2])
@@ -56,6 +129,13 @@ for i in range(0,len(tm)):
 #%%
 
 plt.plot(y,z)
+#%%
+
+torque_plot=[]
+for i in torque_list:
+    torque_plot.append(i[2])
+    
+plt.plot(tm,torque_plot)
 
 
 #theta_list=[]

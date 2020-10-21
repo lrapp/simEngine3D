@@ -14,8 +14,12 @@ import sympy as sym
 
 def pendulum(X,constraint_list,t):
 #    f=np.cos(np.pi/4*np.cos(2*t))
-    df=np.cos(-1/2**np.pi*np.sin(2*t))
-    ddf=np.cos(-np.pi*np.cos(2*t))
+#    df=np.cos(-1/2**np.pi*np.sin(2*t))
+#    ddf=np.cos(-np.pi*np.cos(2*t))
+
+    df=np.pi*np.sin(2*t)*np.cos((np.pi*np.cos(t*2))/4)*-1/2
+    ddf=np.pi**2*np.sin(t*2)**2*np.sin((np.pi*np.cos(t*2))/4)*(-1/4)-np.pi*np.cos(t*2)*np.cos((np.pi*np.cos(t*2))/4)
+                   
     
     phi_values=[]
     for i in constraint_list:
@@ -35,28 +39,7 @@ def pendulum(X,constraint_list,t):
             if i.type.strip(" ' ") == 'DP1':
                 dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
                 phi_partials_values.append([drj,dpj])
-                               
-    nue_values=[]
-    for i in constraint_list:
-            if i.type.strip(" ' ") == 'CD':
-                nue_values.append(CD_nue(X,i,df))
-            if i.type.strip(" ' ") == 'DP1':
-                nue_values.append(DP1_nue(X,i,df))            
-                
-    gamma_values=[]
-    for i in constraint_list:
-            if i.type.strip(" ' ") == 'CD':
-                gamma_values.append(gamma_CD(X,i,ddf))
-            if i.type.strip(" ' ") == 'DP1':
-                gamma_values.append(gamma_DP1(X,i,ddf))
-    
-    
-#    print("PHI(q,t)=",str(phi_values))
-    
-    #for i in range(0,len(phi_partials_values)):
-    #    print("phi_qi_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][0]),str(","),str(phi_partials_values[i][1]))
-    #    print("phi_qj_cd_",str(constraint_list[i].ID),"=",str(phi_partials_values[i][2]),str(","),str(phi_partials_values[i][3]))
-        
+
         
     #%% Assembel Jacobian
     ja_list=[]
@@ -107,13 +90,43 @@ def pendulum(X,constraint_list,t):
     if counter == 30:
         print("Failed to converge")
 
-    omega=df
-    p_j=X[1].q[3:]
-    E = build_G(p_j)
-    X[1].p_dot_j=0.5*np.transpose(E)*omega
+                               
+    nue_values=[]
+    for i in constraint_list:
+            if i.type.strip(" ' ") == 'CD':
+                nue_values.append(CD_nue(X,i,df))
+            if i.type.strip(" ' ") == 'DP1':
+                nue_values.append(DP1_nue(X,i,df))            
+                
+    nue_values.append(0)
     
+    #calculate p_dot
+    q_dot=np.dot(np.linalg.inv(jacobian),nue_values)
+    r_dot=q_dot[:3]
+    r_dot.shape=(3,1)
+    X[1].r_dot=r_dot
      
+    p_dot=q_dot[3:]
+    p_dot.shape=(4,1)
+    X[1].p_dot=p_dot
+     
+    gamma_values=[]
+    for i in constraint_list:
+            if i.type.strip(" ' ") == 'CD':
+                gamma_values.append(gamma_CD(X,i,ddf))
+            if i.type.strip(" ' ") == 'DP1':
+                gamma_values.append(gamma_DP1(X,i,ddf))
+    
         
-    return X
-
+    gamma_values.append(float(-2*np.dot(np.transpose(X[1].p_dot),X[1].p_dot)))
+    
+    q_d_dot=np.dot(np.linalg.inv(jacobian),gamma_values)
+    r_d_dot=q_d_dot[:3]
+    r_d_dot.shape=(3,1)
+    X[1].r_d_dot=r_d_dot
+    p_d_dot=q_d_dot[3:]
+    p_d_dot.shape=(4,1)
+    X[1].p_d_dot=p_d_dot
+   
+    return X,jacobian,gamma_values
     

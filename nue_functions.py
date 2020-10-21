@@ -38,42 +38,21 @@ def tilde(a_vector):
 
 #%%
 def DP1_nue(X,C,dft):
-    #Set bodys i and j 
-    for i in X:
-        if i.name == "body i":
-            i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i) 
-            
-    I=X[i_index]
-    J=X[j_index]        
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
 
+    if C.name == "driving":
+        dft=dft
+    else:
+        dft=0
 
     return dft
 #%%
 def CD_nue(X,C,dft):
-    #Set bodys i and j 
-    for i in X:
-        if i.name == "body i":
-            i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i) 
-            
-    I=X[i_index]
-    J=X[j_index]      
-    
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
+
+    if C.name == "driving":
+        dft=dft
+    else:
+        dft=0
+        
     return dft
 
 #%%

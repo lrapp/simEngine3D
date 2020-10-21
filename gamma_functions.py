@@ -75,6 +75,11 @@ def gamma_DP1(X,C,ddf):
     
     a_dot_i_T=np.transpose(a_dot_i)
     
+    if C.name == "driving":
+        ddf=ddf
+    else:
+        ddf=0
+    
     gamma_DP1=np.dot(np.dot(-a_i_T,B_dot_j),p_dot_j)-np.dot(np.dot(a_j_T,B_dot_i),p_dot_i)-2*np.dot(a_dot_i_T,a_dot_j)+ddf
     return float(gamma_DP1)
 
@@ -139,11 +144,12 @@ def gamma_DP2(X,ddf):
     d_ij_T=np.transpose(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
     d_ij_dot=r_dot_j+np.dot(B_p_j__s_bar_j,p_dot_j)-r_dot_i-np.dot(B_p_i__s_bar_i,p_dot_i)
 
+
     gamma_DP2=np.dot(np.dot(-a_i_T,B_p_dot_j__s_bar_j),p_dot_j)+np.dot(np.dot(a_i_T,B_p_dot_i__s_bar_i),p_dot_i)-np.dot(np.dot(d_ij_T,B_dot_i),p_dot_i)-2*np.dot(a_dot_i_T,d_ij_dot)+ddf
 
     return float(gamma_DP2)
 #%%
-def gamma_CD(X,C,ddft):
+def gamma_CD(X,C,ddf):
         #Set bodys i and j 
     for i in X:
         if i.name == "body i":
@@ -164,13 +170,20 @@ def gamma_CD(X,C,ddft):
     
     c_T=np.transpose(c)
 
+    if C.name == "driving":
+        ddf=ddf
+    else:
+        ddf=0
+        
+
     B_dot_i=build_B(p_dot_i,s_bar_i)
+    
     if s_bar_j.all() == 0:
         B_dot_j=np.zeros([3,4])
     else:
         B_dot_j=build_B(p_dot_j,s_bar_j)
     
-    gamma_CD=np.dot(np.dot(c_T,B_dot_i),p_dot_i)-np.dot(np.dot(c_T,B_dot_j),p_dot_j)+ddft
+    gamma_CD=np.dot(np.dot(c_T,B_dot_i),p_dot_i)-np.dot(np.dot(c_T,B_dot_j),p_dot_j)+ddf
     
     return float(gamma_CD)
 #%%

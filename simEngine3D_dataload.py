@@ -15,7 +15,8 @@ class body():
         self.r_dot= np.array([0,0,0],dtype=np.float64)
         self.s_bar = np.array([0,0,0],dtype=np.float64)
         self.normalized= bool()
-        self.p_dot_j= np.zeros([4,1])
+        self.p_dot= np.zeros([4,1])
+        self.p_d_dot= np.zeros([4,1])        
 #%%
 def array_dot(V):
     for i in range(0,len(V)-1):
