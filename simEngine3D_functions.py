@@ -71,7 +71,17 @@ def build_G(p):
         G[2,3]=e0
         return G
     
-    
+ #%%
+def tilde(a_vector):
+    t=np.zeros([3,3],dtype=float)
+    t[0,1]=-a_vector[2]
+    t[0,2]=a_vector[1]
+    t[1,0]=a_vector[2]
+    t[1,2]=-a_vector[0]
+    t[2,0]=-a_vector[1]
+    t[2,1]=a_vector[0]
+    return t
+    #%%   
 
 def build_A_angles(phi,theta,psi):
     import numpy as np

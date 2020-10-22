@@ -4,7 +4,7 @@ os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")
 from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
 from nue_functions import DP1_nue,CD_nue,DP2_nue,D_nue
 from gamma_functions import gamma_DP1,gamma_CD,gamma_DP2, gamma_D
-from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
+from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body,CD_PI,DP1_PI
 from HW6_Q2_flags import flags_in,points_in, f_in
 from constraints_in import constraints_in
 from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G
@@ -30,6 +30,15 @@ def pendulum(X,constraint_list,t):
     
     #Add euler parameter constraint
     phi_values.append(round(float((np.dot(np.transpose(X[1].q[3:]),X[1].q[3:])-1)),12))
+    
+    pi_values=[]
+    for i in constraint_list:
+            if i.type.strip(" ' ") == 'CD':
+                PI_j=CD_PI(X,i)
+                pi_values.append(PI_j)
+            if i.type.strip(" ' ") == 'DP1':
+                PI_j=DP1_PI(X,i)
+                pi_values.append(PI_j)
     
     phi_partials_values=[]
     for i in constraint_list:
@@ -128,5 +137,5 @@ def pendulum(X,constraint_list,t):
     p_d_dot.shape=(4,1)
     X[1].p_d_dot=p_d_dot
    
-    return X,jacobian,gamma_values
+    return X,jacobian,gamma_values,pi_values
     

@@ -4,7 +4,7 @@ from pendulum_function import pendulum
 import numpy as np
 from constraints_in import constraints_in
 from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
-from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G
+from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G,tilde
 import matplotlib.pyplot as plt
 
 L=2
@@ -25,7 +25,7 @@ J_bar[1,1]=1/12*m*(L**2+c**2)
 J_bar[2,2]=1/12*m*(L**2+b**2)
 
 
-F=np.array([0,0,-9.81])
+F=np.array([0,0,m*-9.81])
 F.shape=(3,1)
 
 tau=np.array([0,0,0])
@@ -58,7 +58,7 @@ p_d_dot=[]
 for i in range(0,len(tm)):
     time=tm[i]
     X[1].A_rotation=build_A(X[1].q[3:])
-    n,partials,gamma_values=pendulum(X,constraint_list,time)
+    n,partials,gamma_values,pi_values=pendulum(X,constraint_list,time)
     partial_list.append(partials)
     body_list.append(n)
     x.append(X[1].q[0])
@@ -69,75 +69,72 @@ for i in range(0,len(tm)):
     p_dot.append(X[1].p_dot)
     p_d_dot.append(X[1].p_d_dot)
     
+    pi_values_a=np.zeros([6,3])
+    for k in range(0,len(pi_values)):
+        pi_values_a[k,:]=pi_values[k]
+    
     #Start inverse dynamics stuff
     ## LHS is blue stuff on left of last equation on pg 478 of 2019 lecture notes
     ##RHS is blue stuff on right of last equation 
     
     phi_r=partials[:,0:3]
     phi_p=partials[:,3:]
+
     
     G=build_G(X[1].q[3:])
+    pi_partials=0.5*np.dot(phi_p[0:6],G.T)    ##for r-omega
+    
     J_P=4*np.dot(np.dot(np.transpose(G),J_bar),G)    
     P=np.zeros([1,4])
     P[0,:]=np.transpose(X[1].q[3:])
     
-#    gamma_p=np.dot(P,X[1].p_d_dot) #slide 475
-    gamma_p=-2*np.dot(X[1].p_dot.T,X[1].p_dot) #slide 473
+    gamma_p=np.dot(P,X[1].p_d_dot) #slide 475
+#    gamma_p=-2*np.dot(X[1].p_dot.T,X[1].p_dot) #slide 473
     gamma_values=np.array(gamma_values)
     
     G_dot=build_G(X[1].p_dot)
-    tau_hat=8*np.dot(np.dot(np.dot(G_dot.T,J_bar),G_dot),X[1].q[3:])
+#    tau_hat=8*np.dot(np.dot(np.dot(G_dot.T,J_bar),G_dot),X[1].q[3:])
+    #Switching to r-omega formulation because I can't figure out the r-p form
+    omega_bar=2*np.dot(G,X[1].p_dot)
+    omega_bar_tilde=tilde(omega_bar)
+    tau=np.dot(np.dot(omega_bar_tilde,J_bar),omega_bar)
     
-    LHS=np.zeros([8,8])
-    LHS[0:3,0:7]=phi_r.T    
-    LHS[3:7,0:7]=phi_p.T
-    LHS[3:7,7:8]=P.T
-    LHS[7:,4:]=P
-    
-    RHS=np.zeros([8,1])
-    RHS[:3,0:1]=F-np.dot(M,X[1].r_d_dot)
-    RHS[3:7]=tau_hat-np.dot(J_P,X[1].p_d_dot)
-    RHS[7]=gamma_p
+    omega_bar_dot=2*np.dot(G,X[1].p_d_dot)
+
+    LHS=np.zeros([6,6])
+    LHS[0:3,0:6]=phi_r[0:6,:].T
+    LHS[3:,0:6]=pi_partials[0:6,:].T
        
-    unknowns=np.dot(np.linalg.inv(LHS),RHS)    
+    RHS=np.zeros([6,1])
+    RHS[0:3,0:1]=-(np.dot(M,X[1].r_d_dot)-F)
+    RHS[3:6,0:1]=-(np.dot(J_bar,omega_bar_dot)-tau)
     
-    lagrange=unknowns[:7]
-    lambda_p=unknowns[7]
+    unknowns=np.dot(np.linalg.inv(LHS),RHS)      
     
-#    RHS=np.zeros([15,1])
-#    RHS[:3,0:1]=F
-#    RHS[3:7]=tau_hat
-#    RHS[7,0]=gamma_p
-#    RHS[8:,0]=gamma_values
-#     
+    #r-p formulation
+#    LHS=np.zeros([8,8])
+#    LHS[0:3,0:7]=phi_r.T    
+#    LHS[3:7,0:7]=phi_p.T
+#    LHS[3:7,7:8]=P.T
+#    LHS[7:,4:]=P
 #    
-#    LHS=np.zeros([15,15])
-#
-#    phi_r=partials[:,0:3]
-#    phi_p=partials[:,3:]
-#        
-#    LHS[0:3,0:3]=M
-#    LHS[0:3,8:]=np.transpose(phi_r)
-#    
-#    LHS[3:7,3:7]=J_P
-#    LHS[3:7,7:8]=np.transpose(P)
-#    LHS[3:7,8:]=np.transpose(phi_p)
-#    
-#    LHS[7,3:7]=P
+#    RHS=np.zeros([8,1])
+#    RHS[:3,0:1]=F-np.dot(M,X[1].r_d_dot)
+#    RHS[3:7]=tau_hat-np.dot(J_P,X[1].p_d_dot)
+#    RHS[7]=gamma_p
 #       
-#    LHS[8:,0:3]=phi_r
-#    LHS[8:,3:7]=phi_p
-#       
-#    unknowns=np.dot(np.linalg.inv(LHS),RHS)
+#    unknowns=np.dot(np.linalg.inv(LHS),RHS)    
 #    
-#    rdd=unknowns[0:3]
-#    pdd=unknowns[3:7]
-#    lambda_P=unknowns[7]
-#    lagrange=unknowns[8:]
+#    lagrange=unknowns[:7]
+#    lambda_p=unknowns[7]
 #    
-    torque=-np.dot(phi_p.T,lagrange)
+#    torque=-np.dot(phi_p.T,lagrange)
+#    torque_list.append(torque)
+
+    torque=np.dot(-pi_partials[0:6,:].T,unknowns)
+#    torque=np.dot(-pi_values[-1].T,unknowns[-1])
+#    torque=np.dot(-pi_values_a.T,unknowns)
     torque_list.append(torque)
-    
         
     X=body_list[i]
 
@@ -152,37 +149,40 @@ for i in range(0,len(tm)):
 #for i in range(0,len(y)):
 #    plt.plot(float(y[i]),float(z[i]),'o')
 #    plt.pause(0.001)
-#%%
-
+#%% position of pendulum
+plt.figure()
 plt.plot(y,z)
 #%%
 
 torque_plot0=[]
 torque_plot1=[]
 torque_plot2=[]
-torque_plot3=[]
+#torque_plot3=[]
 
 for i in torque_list:
     torque_plot0.append(i[0])
     torque_plot1.append(i[1])
     torque_plot2.append(i[2])
-    torque_plot3.append(i[3])
+#    torque_plot3.append(i[3])
     
-plt.plot(tm,torque_plot0)
-plt.plot(tm,torque_plot1)
+plt.figure()
+#plt.plot(tm,torque_plot0,label='x)
+#plt.plot(tm,torque_plot1)
 plt.plot(tm,torque_plot2)
-plt.plot(tm,torque_plot3)
+plt.title("Torque")
+plt.ylabel("Torque (N*m)")
+plt.xlabel("time")
+#plt.plot(tm,torque_plot3)
 
-#theta_list=[]
-#for i in range(0,len(t)):
-#    time=t[i]
-#    theta_list.append(np.pi/4*np.cos(2*time))
 
 #%%
 plt.figure()
-plt.plot(tm,x)
-plt.plot(tm,y)
-plt.plot(tm,z)
+plt.plot(tm,x,label='x')
+plt.plot(tm,y,label='y')
+plt.plot(tm,z,label='z')
+plt.title("x,y and z position vs time")
+plt.legend()
+plt.xlabel('time')
 
 #%%
 

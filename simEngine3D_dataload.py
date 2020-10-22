@@ -200,6 +200,44 @@ def tilde(a_vector):
     return t
     
 #%%
+def DP1_PI(X,C):
+    for i in X:
+        if i.name == "body i":
+            i_index=X.index(i)
+        if i.name == "body j":
+            j_index=X.index(i) 
+            
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    A_i=I.A_rotation
+    A_j=J.A_rotation
+    
+    #Performe some transposes 
+    a_bar_i_T=np.transpose(a_bar_i)
+    a_bar_j_T=np.transpose(a_bar_j)
+    A_i_T=np.transpose(A_i)
+    A_j_T=np.transpose(A_j)
+
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    p_dot_i=I.p_dot
+    p_dot_j=J.p_dot
+
+    a_j=np.dot(J.A_rotation,a_bar_j)
+    a_i=np.dot(I.A_rotation,a_bar_i)
+    a_i_T=np.transpose(a_i)
+
+    a_bar_tilde_j=tilde(a_bar_j)
+    a_j_T=np.transpose(a_j)    
+    
+    PI_j=-np.dot(np.dot(np.dot(a_i_T,A_i.T),A_j),a_bar_tilde_j)
+    
+    return PI_j
+
+#%%
 def DP1_PHI_partials(X,C):
     for i in X:
         if i.name == "body i":
@@ -243,6 +281,53 @@ def DP1_PHI_partials(X,C):
     PHI_DP1_r_j=np.array([0,0,0])
     
     return PHI_DP1_r_i,PHI_DP1_p_i,PHI_DP1_r_j,PHI_DP1_p_j
+#%%
+def CD_PI(X,C):
+        #Set bodys i and j 
+    for i in X:
+        if i.name == "body i":
+            i_index=X.index(i)
+        if i.name == "body j":
+            j_index=X.index(i) 
+            
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    A_i=I.A_rotation
+    A_j=J.A_rotation
+    
+    #Performe some transposes 
+    a_bar_i_T=np.transpose(a_bar_i)
+    a_bar_j_T=np.transpose(a_bar_j)
+    A_i_T=np.transpose(A_i)
+    A_j_T=np.transpose(A_j)
+    
+    
+    #define G and p_dot
+
+    p_dot_i=I.p_dot
+    p_dot_j=J.p_dot
+    
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    
+    s_bar_i=C.s_bar_i
+    s_bar_j=C.s_bar_j
+    
+    a_j=np.dot(A_j,a_bar_j)
+    a_i=np.dot(A_i,a_bar_i)
+    a_i_T=np.transpose(a_i)
+    
+    c=C.c
+    c_T=np.transpose(c)
+    s_bar_j_tilde=tilde(s_bar_j)
+    
+    PI_j=-np.dot(np.dot(c_T,A_j),s_bar_j_tilde)
+    
+    return PI_j
+
 #%%
 def CD_PHI_partials(X,C):
         #Set bodys i and j 
