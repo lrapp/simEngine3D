@@ -1,6 +1,8 @@
 import numpy as np
 from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
 from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
+from nue_functions import DP1_nue,CD_nue
+from gamma_functions import gamma_DP1,gamma_CD
 
 
 def build_p(theta):
@@ -71,6 +73,50 @@ def build_G(p):
         G[2,3]=e0
         return G
     
+def build_E(p):
+        e0=p[0]
+        e1=p[1]
+        e2=p[2]
+        e3=p[3]
+        
+        E=np.zeros([3,4])
+        E[0,0]=-e1
+        E[0,1]=e0
+        E[0,2]=-e3
+        E[0,3]=e2
+        E[1,0]=-e2
+        E[1,1]=e3
+        E[1,2]=e0
+        E[1,3]=-e1
+        E[2,0]=-e3
+        E[2,1]=-e2
+        E[2,2]=e1
+        E[2,3]=e0
+        return E
+    
+ #%%
+def build_B(p_vector,a_vector):
+    e0=p_vector[0]
+    e=p_vector[1:]
+    a_bar=a_vector
+    I3=np.identity(3)
+    
+    a_bar_T=np.transpose(a_bar)
+    a_bar_tilde=tilde(a_bar)
+    e_tilde=tilde(e)
+    
+    B=np.zeros([3,4])
+    X=(2*(np.dot(np.dot(float(e0),I3)+e_tilde,a_bar)))
+       
+    Y=(2*(np.dot(e,a_bar_T)-np.dot(np.dot(float(e0),I3)+e_tilde,a_bar_tilde)))
+    for i in range(0,len(X)):
+        B[i,0]=X[i]
+    B[0,1:]=Y[0]
+    B[1,1:]=Y[1]
+    B[2,1:]=Y[2]
+
+    return B
+
  #%%
 def tilde(a_vector):
     t=np.zeros([3,3],dtype=float)
@@ -100,6 +146,19 @@ def build_A_angles(phi,theta,psi):
     
     return A
 
+def check_phi(X,cl,time,tol):
+    phi=calc_phi(X,cl,time)
+    check=0
+    for i in phi:
+        if i > tol:
+            check=1
+    if check == 1:
+        print("initial conditions did not satisfy phi=0")
+    else:
+        print("initial conditions satisfy phi=0")
+    return 
+    
+
 
 def calc_phi(X,cl,t):
     phi_values=[]
@@ -123,7 +182,29 @@ def calc_partials(X,cl):
                 dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
                 phi_partials_values.append([drj,dpj])    
     return phi_partials_values
+#%%
 
+def calc_nue(X,cl,df):
+    nue_values=[]
+    for i in cl:
+            if i.type.strip(" ' ") == 'CD':
+                nue_values.append(CD_nue(X,i,df))
+            if i.type.strip(" ' ") == 'DP1':
+                nue_values.append(DP1_nue(X,i,df))            
+    return nue_values
+
+#%%
+
+def calc_gamma(X,cl,ddf):
+    gamma_values=[]
+    for i in cl:
+            if i.type.strip(" ' ") == 'CD':
+                gamma_values.append(gamma_CD(X,i,ddf))
+            if i.type.strip(" ' ") == 'DP1':
+                gamma_values.append(gamma_DP1(X,i,ddf))
+    return gamma_values
+
+#%%
 def build_ja(X,phi_partials_values):
     ja_list=[]
     for i in range(0,len(phi_partials_values)):
