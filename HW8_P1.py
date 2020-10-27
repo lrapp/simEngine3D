@@ -7,7 +7,9 @@ from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2
 from simEngine3D_functions import build_p, build_A, calc_phi, calc_partials, build_ja,build_G,tilde,calc_nue,check_phi,calc_gamma,build_E
 import matplotlib.pyplot as plt
 from new_partials import DP1_phi_parital_lagrange,CD_phi_parital_lagrange
+import time as ttime
 
+tic=ttime.perf_counter()
 h=0.001
 
 
@@ -274,19 +276,18 @@ for ii in range(1,len(time_list)):
             print("did not converge")
     
     r_list[:,n:n+1]=r
-#    r_list.append(r)
-#    p_list.append(p)
     p_list[:,n:n+1]=p
-    
-#    r_d_list.append(r_d)
+
     r_d_list[:,n:n+1]=r_d
-            
     p_d_list[:,n:n+1]=p_d
+            
     r_dd_list.append(z[0:3])
     p_dd_list.append(z[3:7])
     lagrange_list.append(z[8:14])
     lambda_p_list.append(z[7:8])
     n=n+1
+
+toc=ttime.perf_counter()
     
     #%%
 
@@ -319,3 +320,6 @@ for i in range(0,max(p_d_list.shape)):
 plt.plot(time_list,omega_list[0,:])
 plt.plot(time_list,omega_list[1,:])
 plt.plot(time_list,omega_list[2,:])
+
+elapsed_time=toc-tic
+print(elapsed_time)
