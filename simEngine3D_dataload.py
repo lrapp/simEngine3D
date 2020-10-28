@@ -28,11 +28,11 @@ def array_dot(V):
                 V.insert(0,x)
     
 #%%import data from input file
-def data_file():
+def data_file(file):
 
     #File path to input file and read contents of file into memory
 #    file=os.getcwd()+"\\input.txt"
-    file=os.getcwd()+"\\revJoint.mdl"    
+#    file=os.getcwd()+"\\revJoint.mdl"    
     
     with open(file,'r') as f:
         contents=f.readlines()

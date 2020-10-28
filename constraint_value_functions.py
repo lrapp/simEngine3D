@@ -5,14 +5,17 @@ import numpy as np
 
 #%%PhI DP1 constraint equation
 def phi_dp1(X,C,f_t):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i)            
-            
+        if i.name == body_2:
+            j_index=X.index(i) 
+               
     I=X[i_index]
-    J=X[j_index]
+    J=X[j_index]    
     
     a_bar_i=C.a_bar_i
     a_bar_j=C.a_bar_j
@@ -32,10 +35,13 @@ def phi_dp1(X,C,f_t):
     return float(phi_dp1_value)
 #%%
 def phi_cd(X,C,ft):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
+        if i.name == body_2:
             j_index=X.index(i) 
                
     I=X[i_index]
@@ -67,10 +73,13 @@ def phi_cd(X,C,ft):
     return float(PHI_CD)
 #%%
 def phi_dp2(X,C,ft):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
+        if i.name == body_2:
             j_index=X.index(i) 
                
     I=X[i_index]

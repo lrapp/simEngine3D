@@ -12,11 +12,13 @@ class constraint():
         self.s_bar_i = np.array([0,0,0],dtype=np.float64)
         self.s_bar_j = np.array([0,0,0],dtype=np.float64)
         self.f=float()
+        self.body_i_name=""
+        self.body_j_name=""
 
 
 file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint.mdl"
 
-def constraints_in():
+def constraints_in(file):
     with open(file,'r') as f:
         contents=f.readlines()
         
@@ -111,6 +113,13 @@ def constraints_in():
                         constraint_list[k].f=0
                     else:
                         constraint_list[k].f=list(i.values())[0].strip()
+                if  list(i.keys())[0] == 'between':
+                    bodies=list(i.values())[0].strip().split('and')
+                    for ii in bodies:
+                        bodies[bodies.index(ii)]=ii.strip(" ' ")
+                    constraint_list[k].body_i_name=bodies[0]
+                    constraint_list[k].body_j_name=bodies[1]
+                        
                                                         
         start_count_index=st+1
         end_count_index=en+1                                       

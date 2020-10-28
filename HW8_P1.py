@@ -10,7 +10,7 @@ from new_partials import DP1_phi_parital_lagrange,CD_phi_parital_lagrange
 import time as ttime
 
 tic=ttime.perf_counter()
-h=0.001
+h=0.01
 
 
 L=2
@@ -42,9 +42,9 @@ p_dd_list=[]
 lambda_p_list=[]
 lagrange_list=[]
          
-
-X=data_file()
-constraint_list=constraints_in()
+file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint.mdl"
+X=data_file(file)
+constraint_list=constraints_in(file)
 
 F=np.array([0,0,m*-9.81]) 
 F.shape=(3,1)
@@ -145,7 +145,7 @@ r_d_list[:,0:1]=r_d_start
 p_d_start=X[1].p_dot
 p_d_start.shape=(4,1)
 p_d_list[:,0:1]=p_d_start
-
+torque_list=[]
 #%%
 #start steps on slide 641
 n=1
@@ -285,6 +285,9 @@ for ii in range(1,len(time_list)):
     p_dd_list.append(z[3:7])
     lagrange_list.append(z[8:14])
     lambda_p_list.append(z[7:8])
+    
+    torque=phi_p.T @ z[8:14] + P.T @ z[7:8]
+    torque_list.append(torque)
     n=n+1
 
 toc=ttime.perf_counter()
@@ -323,3 +326,10 @@ plt.plot(time_list,omega_list[2,:])
 
 elapsed_time=toc-tic
 print(elapsed_time)
+
+#%%
+torque1=[]
+for i in torque_list:
+    torque1.append(i[0])
+    
+plt.plot(time_list[:500],torque1)
