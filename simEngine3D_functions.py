@@ -204,6 +204,7 @@ def calc_partials(X,cl):
                 phi_partials_values.append([drj,dpj])    
     return phi_partials_values
 
+
 #%%
 
 def calc_partials_HW82(X,cl):
