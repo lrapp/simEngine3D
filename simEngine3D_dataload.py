@@ -239,12 +239,15 @@ def DP1_PI(X,C):
 
 #%%
 def DP1_PHI_partials(X,C):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
+        if i.name == body_2:
             j_index=X.index(i) 
-            
+               
     I=X[i_index]
     J=X[j_index]  
     #Set a and A for bodies i and j
@@ -284,11 +287,15 @@ def DP1_PHI_partials(X,C):
 #%%
 def CD_PI(X,C):
         #Set bodys i and j 
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
+        if i.name == body_2:
             j_index=X.index(i) 
+               
             
     I=X[i_index]
     J=X[j_index]  
@@ -331,12 +338,15 @@ def CD_PI(X,C):
 #%%
 def CD_PHI_partials(X,C):
         #Set bodys i and j 
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
     for i in X:
-        if i.name == "body i":
+        if i.name == body_1:
             i_index=X.index(i)
-        if i.name == "body j":
+        if i.name == body_2:
             j_index=X.index(i) 
-            
+                           
     I=X[i_index]
     J=X[j_index]  
     #Set a and A for bodies i and j

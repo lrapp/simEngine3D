@@ -207,28 +207,49 @@ def calc_partials(X,cl):
 #%%
 
 def calc_partials_HW82(X,cl):
-    phi_partials_values=[]
+    phi_partials_values=np.zeros([len(cl),7*len(X)])
+    counter=0
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
                 dri,dpi,drj,dpj=CD_PHI_partials(X,i)
-                dri.shape=(3,1)
-                dpi.shape=(4,1)
-                drj.shape=(3,1)
-                dpj.shape=(4,1)
-                
-                partials_n=np.concatenate((dri,drj,dpj,dpj))
-                partials_n.shape=(1,14)
-                phi_partials_values.append(partials_n)
+                if i.body_i_name == "body i":
+                    phi_partials_values[counter,0:3]=dri
+                    phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
+                                       
+                if i.body_i_name == "body j":
+                    phi_partials_values[counter,3:6]=dri          
+                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
+                                        
+                if i.body_j_name == "body j":
+                    phi_partials_values[counter,3:6]=drj          
+                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
+                                        
+                if i.body_j_name == "body k":
+                    phi_partials_values[counter,6:9]=drj          
+                    phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                  
+
             if i.type.strip(" ' ") == 'DP1':
-                dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
-                dri.shape=(3,1)
-                dpi.shape=(4,1)
-                drj.shape=(3,1)
-                dpj.shape=(4,1)
                 
-                partials_n=np.concatenate((dri,drj,dpi,dpj))
-                partials_n.shape=(1,14)                
-                phi_partials_values.append(partials_n)  
+                dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
+
+                if i.body_i_name == "body i":
+                    phi_partials_values[counter,0:3]=dri
+                    phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
+                                       
+                if i.body_i_name == "body j":
+                    phi_partials_values[counter,3:6]=dri          
+                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
+                                        
+                if i.body_j_name == "body j":
+                    phi_partials_values[counter,3:6]=drj          
+                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
+                                        
+                if i.body_j_name == "body k":
+                    phi_partials_values[counter,6:9]=drj          
+                    phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                                                    
+        
+            counter=counter+1
+                
     return phi_partials_values
 #%%
 def calc_phi_HW82(X,cl,t):
@@ -279,7 +300,7 @@ def build_ja(X,phi_partials_values):
         jacobian[i,:]=ja_list[i]
         
     #add euler parameter normalization constraint to jacobian
-    for k in range(1,len(X)):
-        jacobian[5+k,3:]=2*X[k].q[3:].T
+#    for k in range(1,len(X)):
+#        jacobian[5+k,3:]=2*X[k].q[3:].T
                 
     return jacobian

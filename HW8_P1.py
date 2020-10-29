@@ -10,7 +10,7 @@ from new_partials import DP1_phi_parital_lagrange,CD_phi_parital_lagrange
 import time as ttime
 
 tic=ttime.perf_counter()
-h=0.01
+h=0.001
 
 
 L=2
@@ -20,7 +20,7 @@ rho=7800
 m=rho*volume
 
 counter=0
-time_list=np.arange(0,5+h,h)
+time_list=np.arange(0,10,h)
                        
 time=time_list[0]
 
@@ -145,7 +145,10 @@ r_d_list[:,0:1]=r_d_start
 p_d_start=X[1].p_dot
 p_d_start.shape=(4,1)
 p_d_list[:,0:1]=p_d_start
-torque_list=[]
+torque_list=[0]
+nue_list=[]
+vel_violation=[]
+
 #%%
 #start steps on slide 641
 n=1
@@ -275,6 +278,10 @@ for ii in range(1,len(time_list)):
         if count > 29:
             print("did not converge")
     
+    nue_values=calc_nue(X_n,constraint_list,df)
+    nue_list.append(nue_values)
+    vel=phi_r @ r_d + phi_p @ p_d
+    vel_violation.append(np.linalg.norm(vel))
     r_list[:,n:n+1]=r
     p_list[:,n:n+1]=p
 
@@ -286,27 +293,34 @@ for ii in range(1,len(time_list)):
     lagrange_list.append(z[8:14])
     lambda_p_list.append(z[7:8])
     
-    torque=phi_p.T @ z[8:14] + P.T @ z[7:8]
+    G=build_G(p)
+    torque=[]
+    for kk in range(0,len(constraint_list)):
+        torque.append(-1/2*G @ phi_p[kk,:] * z[8+kk])
+        
+#    torque=-0.5*(G @ phi_p[5] * z[13:14])
+#    torque=phi_p.T @ z[8:14] + P.T @ z[7:8]
     torque_list.append(torque)
     n=n+1
 
 toc=ttime.perf_counter()
+elapsed_time=toc-tic
+print(elapsed_time)
     
     #%%
 
-x=r_list[0,:]
-y=r_list[1,:]
-z=r_list[2,:]
+xx=r_list[0,:]
+yy=r_list[1,:]
+zz=r_list[2,:]
 
-plt.figure()
-plt.plot(time_list,x)
-
-
-plt.figure()
-plt.plot(time_list,y)
-
-plt.figure()
-plt.plot(time_list,z)
+fig, axs = plt.subplots(3)
+axs[0].plot(time_list,xx)
+axs[0].set(ylabel='x')
+axs[1].plot(time_list,yy)
+axs[1].set(ylabel='y')
+axs[2].plot(time_list,zz)
+axs[2].set(ylabel='z')
+axs[2].set(xlabel='time')
 
 #%%calculate omega
 E_list=[]
@@ -320,16 +334,38 @@ for i in range(0,max(p_d_list.shape)):
     omega_list[:,i:i+1]=omega
 
 #%%
-plt.plot(time_list,omega_list[0,:])
-plt.plot(time_list,omega_list[1,:])
-plt.plot(time_list,omega_list[2,:])
 
-elapsed_time=toc-tic
-print(elapsed_time)
+
+omega_x=omega_list[0,:]
+omega_y=omega_list[1,:]
+omega_z=omega_list[2,:]
+
+fig, axs = plt.subplots(3)
+axs[0].plot(time_list,omega_x)
+axs[0].set(ylabel='omega x')
+axs[1].plot(time_list,omega_y)
+axs[1].set(ylabel='omega y')
+axs[2].plot(time_list,omega_z)
+axs[2].set(ylabel='omega z')
+axs[2].set(xlabel='time')
+
+
 
 #%%
-torque1=[]
-for i in torque_list:
-    torque1.append(i[0])
+torque1=[0]
+for i in range(1,len(torque_list)):
+    torque1.append(torque_list[i][-1][2])
     
-plt.plot(time_list[:500],torque1)
+plt.plot(time_list,torque1)
+plt.ylabel('Torque')
+plt.xlabel('Time')
+#%%
+nue_array=np.zeros([len(time_list)-1,6])
+violation_list=[0]
+for i in range(0,len(nue_list)):
+    nue_array[i,:]=nue_list[i]
+    violation_list.append(np.linalg.norm(nue_array[i,:]))
+
+plt.plot(time_list,violation_list)
+plt.ylabel('2-Norm of Velocity Violation')
+plt.xlabel('Time')

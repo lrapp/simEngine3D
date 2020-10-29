@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from new_partials import DP1_phi_parital_lagrange,CD_phi_parital_lagrange
 import time as ttime
 
-#%% Read in body and constraint information
+# Read in body and constraint information
 file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P2_input.txt"
 X=data_file(file)
 constraint_list=constraints_in(file)
@@ -34,7 +34,7 @@ time=time_list[0]
 df=0
 ddf=0
 
-nb=2
+nb=3
 nc=len(constraint_list)
 
 r_list=np.zeros([3*nb,len(time_list)])
@@ -49,14 +49,21 @@ p_dd_list=[]
 lambda_p_list=[]
 lagrange_list=[]
          
+F0=np.array([0,0,0]) 
+F0.shape=(3,1)
 F1=np.array([0,0,m1*-9.81]) 
 F1.shape=(3,1)
 F2=np.array([0,0,m2*-9.81]) 
 F2.shape=(3,1)
 
-F=np.zeros([6,1])
-F[0:3]=F1
-F[3:6]=F2
+#F=np.zeros([3*nb,1])
+#F[0:3]=F1
+#F[3:6]=F2
+ 
+F=np.zeros([3*nb,1])
+F[0:3]=F0
+F[3:6]=F1
+F[6:9]=F2
 
 tau=np.array([0,0,0])
 tau.shape=(3,1)
@@ -68,6 +75,12 @@ A_start[0,2]=np.cos(0)
 A_start[1,0]=np.cos(0)
 A_start[2,1]=np.cos(0)
 p_start=build_p_from_A(A_start)
+
+
+x0_q_start=np.array([0,0,0,1,0,0,0])
+x0_q_start.shape=(7,1)
+X[0].q=x0_q_start
+
 
 r_start.shape=(3,1)
 p_start.shape=(4,1)
@@ -91,8 +104,8 @@ X[2].A_rotation=build_A(X[2].q[3:])
 tol=1e-5
 phi=calc_phi_HW82(X,constraint_list,0)
 check_phi(X,constraint_list,0,tol)
-PHI_P=np.zeros([2,1])
-for i in range(1,len(X)):
+PHI_P=np.zeros([nb,1])
+for i in range(0,len(X)):
     PHI_P[i-1]=1/2*(X[i].q[3:].T @ X[i].q[3:]) - 1/2
          
 if PHI_P.any() > tol:
@@ -110,39 +123,37 @@ lagrange_list=[]
 partials=calc_partials_HW82(X,constraint_list)
 jacobian=np.vstack(partials)
 
-phi_r=np.zeros([nc,6])
-phi_r[:5,:]=jacobian[0:5,0:6]
-phi_r[5:,:]=jacobian[5:,3:9]
-
-#phi_p=jacobian[:,13:]
-phi_p=np.zeros([nc,8])
-phi_p[:5,:]=jacobian[0:5,9:17]
-phi_p[5:,:]=jacobian[5:,13:]
 
 nue_values=calc_nue(X,constraint_list,df)
 
-#phi_r=np.zeros([10,3*nb])
-#phi_r[:,0:3]=jacobian[:,0:3] #get ri
-#phi_r[:,3:6]=jacobian[:,3:6]
-#
-#phi_p=np.zeros([10,8])
-#phi_p[:,0:4]=jacobian[:,6:10]
-#phi_p[:,4:8]=jacobian[:,10:14]
+
+phi_r=np.zeros([nc,3*nb])
+#phi_r=jacobian[:,3:9]
+phi_r=jacobian[:,0:3*nb]
+
+phi_p=np.zeros([nc,4*nb])
+phi_p=jacobian[:,3*nb:3*nb+4*nb]
+#phi_p=jacobian[:,13:]
 
 gamma_values=calc_gamma(X,constraint_list,ddf)
            
-           
+M0=np.zeros([3,3])
 M1=m1*np.identity(3)
 M2=m2*np.identity(3)
+M_list=[M0,M1,M2]
 
-M=np.zeros([6,6])
-M[0:3,0:3]=M1
-M[3:6,3:6]=M2
+M=np.zeros([3*nb,3*nb])
+for k in range(0,nb):
+    M[k*nb:k*nb+3,k*nb:k*nb+3]=M_list[k]
+
  
 J_bar1=np.zeros([3,3])
 
 b=0.05/2
 c=0.05/2
+
+J_bar0=np.zeros([3,3])
+
 J_bar1[0,0]=1/12*m1*(b**2+c**2)
 J_bar1[1,1]=1/12*m1*(L**2+c**2)
 J_bar1[2,2]=1/12*m1*(L**2+b**2)
@@ -152,62 +163,63 @@ J_bar2[0,0]=1/12*m1*(b**2+c**2)
 J_bar2[1,1]=1/12*m1*(L/2**2+c**2)
 J_bar2[2,2]=1/12*m1*(L/2**2+b**2)
 
-J_bar=[J_bar1,J_bar2]
+J_bar=[J_bar0,J_bar1,J_bar2]
 
 G=[]
-for i in range(1,len(X)):
+for i in range(0,len(X)):
     G.append(build_G(X[i].q[3:]))
 
 J_P_list=[]
 for i in range(0,len(G)):
     J_P_list.append(4*np.dot(np.dot(np.transpose(G[i]),J_bar[i]),G[i]))    
     
-J_P=np.zeros([8,8])
-J_P[0:4,0:4]=J_P_list[0]
-J_P[4:8,4:8]=J_P_list[1]
+J_P=np.zeros([nb*4,nb*4])
+for k in range(0,nb):
+    J_P[k*(4):k*(4)+4,k*(4):k*(4)+4]=J_P_list[k]
+    
 
 G_dot=[]
-for i in range(1,len(X)):
+for i in range(0,len(X)):
     G_dot.append(build_G(X[i].p_dot))
 
 tau_hat_list=[]
 for i in range(0,len(G_dot)):
-    tau_hat_list.append(8*np.dot(np.dot(np.dot(G_dot[i].T,J_bar[i]),G_dot[i]),X[i+1].q[3:]))
+    tau_hat_list.append(8*np.dot(np.dot(np.dot(G_dot[i].T,J_bar[i]),G_dot[i]),X[i].q[3:]))
 
-tau_hat=np.zeros([8,1])
-tau_hat[0:4]=tau_hat_list[0]
-tau_hat[4:8]=tau_hat_list[1]
+tau_hat=np.zeros([4*nb,1])
+for k in range(0,nb):
+    tau_hat[k*4:k*4+4]=tau_hat_list[k]
 
-P=np.zeros([2,8])
-P[0,0:4]=X[1].q[3:].T
-P[1,4:8]=X[2].q[3:].T
+P=np.zeros([nb,nb*4])
+for k in range(0,nb):
+    P[k,k*4:k*4+4]=X[k].q[3:].T
 
-LHS=np.zeros([26,26])
-LHS[0:6,0:6]=M
-LHS[0:6,16:26]=phi_r.T 
+
+LHS=np.zeros([8*nb+nc,8*nb+nc])
+LHS[0:3*nb,0:3*nb]=M
+LHS[0:3*nb,8*nb:8*nb+nc]=phi_r.T 
    
-LHS[6:14,6:14]=J_P
-LHS[6:14,14:16]=P.T
-LHS[6:14,16:26]=phi_p.T
+LHS[3*nb:7*nb,3*nb:7*nb]=J_P
+LHS[3*nb:7*nb,7*nb:7*nb+nb]=P.T
+LHS[3*nb:7*nb,8*nb:8*nb+nc]=phi_p.T
 
-LHS[14:16,6:14]=P
+LHS[7*nb:8*nb,3*nb:7*nb]=P
    
-LHS[16:26,0:6]=phi_r
-LHS[16:26,6:14]=phi_p
+LHS[8*nb:8*nb+nc,0:3*nb]=phi_r
+LHS[8*nb:8*nb+nc,3*nb:7*nb]=phi_p
    
-RHS=np.zeros([26,1])
+RHS=np.zeros([8*nb+nc,1])
 
-gamma_p=[]
-for i in range(1,len(X)):   
-    gamma_p.append(-2*np.dot(X[i].p_dot.T,X[i].p_dot)) #slide 473
+gamma_p=np.zeros([nb,1])
+for i in range(0,len(X)):   
+    gamma_p[i]=(-2*np.dot(X[i].p_dot.T,X[i].p_dot)) #slide 473
 
-RHS[0:6]=F
-RHS[6:14]=tau_hat
-RHS[14]=gamma_p[0]
-RHS[15]=gamma_p[1]
-gamma_hat=np.array(gamma_values) #remove eulear parameterization constraint
+RHS[0:3*nb]=F
+RHS[3*nb:7*nb]=tau_hat
+RHS[7*nb:8*nb]=gamma_p
+gamma_hat=np.array(gamma_values)
 gamma_hat.shape=(10,1)
-RHS[16:26]=gamma_hat
+RHS[8*nb:8*nb+nc]=gamma_hat
    
 unknowns=np.dot(np.linalg.inv(LHS),RHS) 
 r_dd_list.append(unknowns[0:6])
@@ -288,7 +300,7 @@ time=time_list[n]
     X_n[1].q[0:3]=r[0:3]
     X_n[2].q[0:3]=r[3:6]    
     X_n[1].q[3:]=p[0:4]
-    X_n[1].q[3:]=p[4:8]
+    X_n[2].q[3:]=p[4:8]
     X_n[1].A_rotation=build_A(X_n[1].q[3:])
     X_n[2].A_rotation=build_A(X_n[2].q[3:])
     
@@ -309,24 +321,17 @@ time=time_list[n]
     
     partials=calc_partials_HW82(X_n,constraint_list)
     jacobian=np.vstack(partials)
-    #jacobian=build_ja(X,partials)
-    
-    phi_r=jacobian[:,3:9]
-    
-    phi_p=jacobian[:,13:]    
     
     nue_values=calc_nue(X_n,constraint_list,df)
     
-    #jacobian=jacobian[:-2,:] #remove euler parameterization constraint
+    phi_r=np.zeros([10,6])
+    phi_r[:,0:3]=jacobian[:,0:3] #get ri
+    phi_r[:,3:6]=jacobian[:,3:6]
     
-#    phi_r=np.zeros([10,6])
-#    phi_r[:,0:3]=jacobian[:,0:3] #get ri
-#    phi_r[:,3:6]=jacobian[:,3:6]
-#    
-#    phi_p=np.zeros([10,8])
-#    phi_p[:,0:4]=jacobian[:,6:10]
-#    phi_p[:,4:8]=jacobian[:,10:14]    
-#    
+    phi_p=np.zeros([10,8])
+    phi_p[:,0:4]=jacobian[:,6:10]
+    phi_p[:,4:8]=jacobian[:,10:14]    
+    
     for i in range(1,len(X)):
         PHI_P[i-1]=1/2*(X_n[i].q[3:].T @ X_n[i].q[3:]) - 1/2
              
@@ -347,8 +352,8 @@ time=time_list[n]
         J_P_list.append(4*np.dot(np.dot(np.transpose(G[i]),J_bar[i]),G[i]))            
         
     P=np.zeros([2,8])
-    P[0,0:4]=X[1].q[3:].T
-    P[1,4:8]=X[2].q[3:].T
+    P[0,0:4]=X_n[1].q[3:].T
+    P[1,4:8]=X_n[2].q[3:].T
             
      
     g=np.zeros([8*nb+nc,1])
@@ -373,6 +378,7 @@ time=time_list[n]
     PSI[3*nb+4*nb+nb:3*nb+4*nb+nb+nc,0:3*nb]=phi_r
     PSI[3*nb+4*nb+nb:3*nb+4*nb+nb+nc,3*nb:3*nb+4*nb]=phi_p
     
-    delta_z=-np.dot(np.linalg.inv(PSI),g)           
+    delta_z=np.dot(np.linalg.inv(PSI),-g)           
+    z=z+delta_z
        
        
