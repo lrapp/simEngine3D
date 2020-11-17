@@ -2,6 +2,12 @@
 
 import numpy as np
 
+def getA(p):
+    e0, e1, e2, e3 = p[0], p[1], p[2], p[3]
+    A = 2 * np.array([[e0**2 + e1**2 - 0.5, e1*e2 - e0*e3, e1*e3 + e0*e2],
+                      [e1*e2 + e0*e3, e0**2 + e2**2 - 0.5, e2*e3 - e0*e1],
+                      [e1*e3 - e0*e2, e2*e3 + e0*e1, e0**2 + e3**2 - 0.5]])
+    return A
 
 #%%PhI DP1 constraint equation
 def phi_dp1(X,C,f_t):
@@ -19,7 +25,10 @@ def phi_dp1(X,C,f_t):
     
     a_bar_i=C.a_bar_i
     a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
+    xx=I.q[3:]
+    xx.shape=(1,4)
+    xx=xx[0]
+    A_i=getA(xx)
     A_j=J.A_rotation
     
     a_bar_i_T=np.transpose(a_bar_i)

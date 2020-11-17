@@ -4,6 +4,8 @@ from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2
 from nue_functions import DP1_nue,CD_nue
 from gamma_functions import gamma_DP1,gamma_CD
 
+from CD import CD_phi
+
 
 #%%
 def build_p_from_A(A):
@@ -191,13 +193,10 @@ def calc_phi(X,cl,t):
     phi_values=[]
     for i in cl:
         if i.type.strip(" ' ") == 'CD':
-            phi_values.append(phi_cd(X,i,eval(i.f)))
+            phi_values.append(CD_phi(X,i,eval(i.f)))
         elif i.type.strip(" ' ") == 'DP1':
             phi_values.append(phi_dp1(X,i,eval(i.f)))
-    
-        #Add euler parameter constraint
-    for k in range(1,len(X)):
-        phi_values.append(round(float((np.dot(np.transpose(X[k].q[3:]),X[k].q[3:])-1)),12))
+
     return phi_values
 
 

@@ -149,3 +149,42 @@ def CD_PHI_partials(X,C):
     
     
     return first[0], second[0], third[0], fourth[0]
+#%%
+
+def CD_phi(X,C,ft):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+               
+    I=X[i_index]
+    J=X[j_index]    
+    
+    xx=I.q[3:]
+    xx.shape=(1,4)
+    xx=xx[0]
+    A_i=getA(xx)
+    A_j=J.A_rotation
+
+    r_j=J.q[0:3]
+    s_bar_j=C.s_bar_j
+    
+    r_i=I.q[0:3]
+    s_bar_i=C.s_bar_i
+             
+    c_T=np.transpose(C.c)
+    
+    if np.count_nonzero(s_bar_j) == 0:
+        d_ij=(-r_i-np.dot(A_i,s_bar_i))
+    elif np.count_nonzero(s_bar_i) == 0:
+        d_ij=(r_j+np.dot(A_j,s_bar_j))
+    else:
+        d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
+    
+    PHI_CD=np.dot(c_T,d_ij)-ft
+                        
+    return float(PHI_CD)  

@@ -8,8 +8,9 @@ Restarting with pieces of my SimEngine3D from homework.  Starting over here for 
 import os
 os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")
 from simEngine3D_dataload import data_file, constraints_in
-from simEngine3D_functions import get_p
+from simEngine3D_functions import get_p, calc_phi
 
+from CD import CD_phi
 import numpy as np
 
 file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint_fix2.txt"
@@ -49,11 +50,16 @@ def main(file):
     # distance between O' and Q are fixed
     s_i_P_bar = np.array([-L,0,0])
     r_i = np.array([0, np.sin(np.pi/4.) * L, -np.cos(np.pi/4.) * L])
+    r_i.shape=(3,1)
     r_i_dot = np.array([0,0,0])
     A = np.array([[0, 0, 1],
                   [ np.sin(np.pi/4.), np.cos(np.pi/4.), 0],
                   [-np.cos(np.pi/4.), np.sin(np.pi/4.), 0]])
     p_i = get_p(A)
+    p_i.shape=(4,1)
     p_i_dot = np.array([0,0,0,0])
     
-    
+    X[0].q[:3]=r_i
+    X[0].q[3:]=p_i
+     
+    phi=calc_phi(X,constraint_list,0)
