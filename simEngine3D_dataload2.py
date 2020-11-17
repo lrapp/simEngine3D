@@ -16,7 +16,7 @@ class body():
         self.s_bar = np.array([0,0,0],dtype=np.float64)
         self.normalized= bool()
         self.p_dot= np.zeros([4,1])
-        self.p_d_dot= np.zeros([4,1])    
+        self.p_d_dot= np.zeros([4,1])        
 #%%
 def array_dot(V):
     for i in range(0,len(V)-1):
@@ -85,9 +85,9 @@ def data_file(file):
                 a=a.strip("[")
                 a=a.strip("]")
                 a=a.split(",")
-                q=np.empty([7,1],dtype=float)
+                q=np.empty([1,7],dtype=float)
                 for n in range(0,len(a)):
-                    q[n]=float(a[n])
+                    q[0,n]=float(a[n])
                 body_ob_list[k].q= q
             if  list(i.keys())[0] == "a_bar":
                 a=list(i.values())[0].strip()
@@ -138,156 +138,30 @@ def data_file(file):
             
         
     #Assemble rotation matrix A using the values e0-e3 provided
-    A_list=[]
-    for i in range(0,len(body_ob_list)):
-        A=np.empty([3,3])
-
-        for k in range(0,len(A)):
-            A[k,k]=2*((body_ob_list[i].q[3]**2)+(body_ob_list[i].q[4+k]**2)-0.5)
-        A[0,1]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[5]-body_ob_list[i].q[3]*body_ob_list[i].q[6])
-        A[0,2]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[5])
-        
-        A[1,0]=2*((body_ob_list[i].q[4]*body_ob_list[i].q[5]+body_ob_list[i].q[3]*body_ob_list[i].q[6]))
-        A[1,2]=2*(body_ob_list[i].q[5]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[4])
-        
-        A[2,0]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[5])
-        A[2,1]=2*((body_ob_list[i].q[5]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[4]))
-    
-        A_list.append(A)
-    
-    for i in range(0,len(A_list)):
-        body_ob_list[i].A_rotation=A_list[i]
+#    A_list=[]
+#    for i in range(0,len(body_ob_list)):
+#        A=np.empty([3,3])
+#
+#        for k in range(0,len(A)):
+#            A[k,k]=2*((body_ob_list[i].q[3]**2)+(body_ob_list[i].q[4+k]**2)-0.5)
+#        A[0,1]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[5]-body_ob_list[i].q[3]*body_ob_list[i].q[6])
+#        A[0,2]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[5])
+#        
+#        A[1,0]=2*((body_ob_list[i].q[4]*body_ob_list[i].q[5]+body_ob_list[i].q[3]*body_ob_list[i].q[6]))
+#        A[1,2]=2*(body_ob_list[i].q[5]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[4])
+#        
+#        A[2,0]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[5])
+#        A[2,1]=2*((body_ob_list[i].q[5]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[4]))
+#    
+#        A_list.append(A)
+#    
+#    for i in range(0,len(A_list)):
+#        body_ob_list[i].A_rotation=A_list[i]
         
 
             
     
     return body_ob_list #returns list of bodies with corisponding information
-#%%
-class constraint():
-    """Object that holds information about bodies"""
-    def __init__(self):
-        self.name = ""
-        self.ID = ""    
-        self.type = ""
-        self.a_bar_i= np.array([0,0,0],dtype=np.float64)
-        self.a_bar_j= np.array([0,0,0],dtype=np.float64)
-        self.s_bar_i = np.array([0,0,0],dtype=np.float64)
-        self.s_bar_j = np.array([0,0,0],dtype=np.float64)
-        self.f=float()
-        self.body_i_name=""
-        self.body_j_name=""
-
-
-
-def constraints_in(file):
-    with open(file,'r') as f:
-        contents=f.readlines()
-        
-    constraints_index=contents.index('constraints:\n') #Know where to start reading in body information
-    end_index=contents.index(']\n',constraints_index) #Know where to start reading in body information
-    
-    constraints=[]    
-    start_count_index=0
-    end_count_index=0                      
-                              
-    
-    for i in range(constraints_index,end_index):
-        constraints.append(contents[i].strip())    
-        
-        
-    count=constraints.count("{") #Count how many left squigly brakets there are, this gives how many bodies there are in the system    
-
-    constraint_list=[]
-    for i in range(0,count):
-        constraint_list.append(constraint())
-        
-    C=[]
-    for k in range(0,count):
-        st=constraints.index("{",start_count_index) #Get first body information
-        en=constraints.index("}",end_count_index) #Stop body information once "}" is found
-
-        y=[]
-        x=[]
-        for i in range(st+1,en):
-        #Create list of each body's information
-            x=[]
-            for i in range(st+1,en):
-                y=constraints[i].partition(":")
-                x.append({y[0].strip("\'").strip().strip(" ' "):y[2].strip()})            
-            
-                
-        for i in x:           
-                if  list(i.keys())[0] == "name":
-                    constraint_list[k].name= list(i.values())[0].strip(" ' ")            
-                if  list(i.keys())[0] == "ID":                    
-                    constraint_list[k].ID= int(list(i.values())[0])                    
-                if  list(i.keys())[0] == "type":
-                    constraint_list[k].type= list(i.values())[0]                        
-                if  list(i.keys())[0] == 's_bar_i':          
-                    a=list(i.values())[0].strip()
-                    a=a.strip("[")
-                    a=a.strip("]")
-                    a=a.split(",")       
-                    q=np.empty([3,1],dtype=float)                
-                    for n in range(0,len(a)):
-                        q[n]=float(a[n])
-                        constraint_list[k].s_bar_i=q
-                if  list(i.keys())[0] == 's_bar_j':          
-                    a=list(i.values())[0].strip()
-                    a=a.strip("[")
-                    a=a.strip("]")
-                    a=a.split(",")       
-                    q=np.empty([3,1],dtype=float)                
-                    for n in range(0,len(a)):
-                        q[n]=float(a[n])
-                        constraint_list[k].s_bar_j=q            
-                if  list(i.keys())[0] == 'a_bar_i':          
-                    a=list(i.values())[0].strip()
-                    a=a.strip("[")
-                    a=a.strip("]")
-                    a=a.split(",")       
-                    q=np.empty([3,1],dtype=float)                
-                    for n in range(0,len(a)):
-                        q[n]=float(a[n])
-                        constraint_list[k].a_bar_i=q                
-                if  list(i.keys())[0] == 'a_bar_j':          
-                    a=list(i.values())[0].strip()
-                    a=a.strip("[")
-                    a=a.strip("]")
-                    a=a.split(",")       
-                    q=np.empty([3,1],dtype=float)                
-                    for n in range(0,len(a)):
-                        q[n]=float(a[n])
-                        constraint_list[k].a_bar_j=q                                        
-                if  list(i.keys())[0] == 'c':          
-                    a=list(i.values())[0].strip()
-                    a=a.strip("[")
-                    a=a.strip("]")
-                    a=a.split(",")       
-                    q=np.empty([3,1],dtype=float)                
-                    for n in range(0,len(a)):
-                        q[n]=float(a[n])
-                        constraint_list[k].c=q           
-                if  list(i.keys())[0] == 'f':
-                    if list(i.values())[0].strip()==0:
-                        constraint_list[k].f=0
-                    else:
-                        constraint_list[k].f=list(i.values())[0].strip()
-                if  list(i.keys())[0] == 'between':
-                    bodies=list(i.values())[0].strip().split('and')
-                    for ii in bodies:
-                        bodies[bodies.index(ii)]=ii.strip(" ' ")
-                    constraint_list[k].body_i_name=bodies[0]
-                    constraint_list[k].body_j_name=bodies[1]
-                        
-                                                        
-        start_count_index=st+1
-        end_count_index=en+1                                       
-
-          
-          
-    return constraint_list
-
 
 
 #%%

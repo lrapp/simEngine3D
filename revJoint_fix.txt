@@ -11,12 +11,11 @@ can enter either normalized or not normalized p values, if not normalized you mu
 must enter normalized p_dot values
 bodies:
 [
-
 	{
 	'name': 'body i'
 	'ID': 1
 	'mass': 1
-	'q(x,y,z,e0,e1,e2,e3)': [0,0,0,1,0,0,0]
+	'q(x,y,z,e0,e1,e2,e3)': [0,0,0,0,0,0,0]
 	'p_dot' : [0,0,0,0]
 	'Need normalized': False
 
@@ -26,7 +25,7 @@ bodies:
 	'name': 'body j'
 	'ID': 2
 	'mass': 0
-	'q(x,y,z,e0,e1,e2,e3)': [0,0,0,0,0,0,0]
+	'q(x,y,z,e0,e1,e2,e3)': [0,0,0,1,0,0,0]
 	'p_dot' : [0,0,0,0]
 	'Need normalized': False
 
@@ -41,8 +40,8 @@ constraints:
 	'name': 'X CD'
 	'ID': 1
 	'type': 'CD'
-	's_bar_i': [0,0,0]
-	's_bar_j': [-2,0,0]
+	's_bar_i': [-2,0,0]
+	's_bar_j': [0,0,0]
 	'c':[1,0,0]
 	'f': 0
 	'between': 'body i and body j'	
@@ -51,8 +50,8 @@ constraints:
 	'name': 'Y CD'
 	'ID': 2
 	'type': 'CD'
-	's_bar_i': [0,0,0]
-	's_bar_j': [-2,0,0]
+	's_bar_i': [-2,0,0]
+	's_bar_j': [0,0,0]
 	'c':[0,1,0]
 	'f':0
 	'between': 'body i and body j'	
@@ -61,37 +60,36 @@ constraints:
 	'name': 'Z CD'
 	'ID': 3
 	'type': 'CD'
-	's_bar_i': [0,0,0]
-	's_bar_j': [-2,0,0]
+	's_bar_i': [-2,0,0]
+	's_bar_j': [0,0,0]
 	'c':[0,0,1]
 	'f': 0
 	'between': 'body i and body j'	
 	}
 	{
-	'name': 'x prime and z DP1'
+	'name': 'DP1 y'
 	'ID': 4
 	'type': 'DP1'
-	'a_bar_i': [0,1,0]
-	'a_bar_j': [0,0,1]
+	'a_bar_i': [0,0,1]
+	'a_bar_j': [0,1,0]
 	'f': 0
 	'between': 'body i and body j'
 	}
 	{
-	'name': 'y prime and z DP1'
+	'name': 'DP1 z'
 	'ID': 5
 	'type': 'DP1'
 	'a_bar_i': [0,0,1]
 	'a_bar_j': [0,0,1]
 	'f': 0
 	'between': 'body i and body j'	
-	}
-
+	}	
 	{
 	'name': 'driving'
 	'ID': 6
 	'type: 'DP1'
-	'a_bar_i': [0,1,0]
-	'a_bar_j': [1,0,0]
+	'a_bar_i': [1,0,0]
+	'a_bar_j': [0,1,0]
 	'f' : np.sin(np.pi/4*np.cos(2*t))
 	'between': 'body i and body j'	
 	}

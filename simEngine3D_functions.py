@@ -20,8 +20,15 @@ def build_p_from_A(A):
 
     return p
 #%%
+# calculate p given A
+def get_p(A):
+    e0 = np.sqrt(0.25 * (np.trace(A) + 1.))
+    e1 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[0][0]))
+    e2 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[1][1]))
+    e3 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[2][2]))
+    return np.array([e0, e1, e2, e3])
 
-
+#%%
 def build_p(theta):
     import numpy as np
     A=np.zeros([3,3])
@@ -45,7 +52,7 @@ def build_p(theta):
 
     return p
 
-
+#%%
 def build_A(p):
         import numpy as np
         A=np.empty([3,3])
@@ -178,7 +185,7 @@ def check_phi(X,cl,time,tol):
         print("initial conditions satisfy phi=0")
     return 
     
-
+#%%
 
 def calc_phi(X,cl,t):
     phi_values=[]
@@ -193,6 +200,8 @@ def calc_phi(X,cl,t):
         phi_values.append(round(float((np.dot(np.transpose(X[k].q[3:]),X[k].q[3:])-1)),12))
     return phi_values
 
+
+#%%
 def calc_partials(X,cl):
     phi_partials_values=[]
     for i in cl:
@@ -203,7 +212,27 @@ def calc_partials(X,cl):
                 dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
                 phi_partials_values.append([drj,dpj])    
     return phi_partials_values
-
+#%%
+#
+#def calc_partials2(X,cl):
+#    if X[1].ground:
+#        r_cols=[0,3]
+#        p_cols=[3,7]
+#        cols=7
+#    else:
+#        cols=7*len(X)
+#        
+#    phi_partials_values=np.zeros([len(cl),cols])
+#    counter=0
+#    for i in cl:
+#            if i.type.strip(" ' ") == 'CD':
+#                phi_partials_values[counter,r_cols[0]:r_cols[1]]=CD_PHI_r(X,i)
+#                phi_partials_values[counter,p_cols[0]:p_cols[1]]=CD_PHI_p(X,i)
+#                
+#            if i.type.strip(" ' ") == 'DP1':
+#
+#                
+#    return phi_partials_values
 
 #%%
 
