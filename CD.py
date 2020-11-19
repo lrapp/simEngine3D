@@ -14,14 +14,30 @@ def tilde(a):
                   [-ay, ax, 0]])
     return t
 
-# get A matrix from euler parameters
-def getA(p):
-    e0, e1, e2, e3 = p[0], p[1], p[2], p[3]
-    A = 2 * np.array([[e0**2 + e1**2 - 0.5, e1*e2 - e0*e3, e1*e3 + e0*e2],
-                      [e1*e2 + e0*e3, e0**2 + e2**2 - 0.5, e2*e3 - e0*e1],
-                      [e1*e3 - e0*e2, e2*e3 + e0*e1, e0**2 + e3**2 - 0.5]])
-    return A
-
+#%%
+def build_A(p):
+        import numpy as np
+        A=np.empty([3,3])
+           
+        e0=p[0]
+        e1=p[1]
+        e2=p[2]
+        e3=p[3]
+        
+        A[0,0]=2*((e0**2+e1**2)-0.5)
+        A[0,1]=2*(e1*e2-e0*e3)
+        A[0,2]=2*(e1*e3+e0*e2)
+        
+        A[1,0]=2*(e1*e2+e0*e3)
+        A[1,1]=2*((e0**2+e2**2)-0.5)        
+        A[1,2]=2*(e2*e3-e0*e1)
+        
+        A[2,0]=2*(e1*e3-e0*e2)
+        A[2,1]=2*(e2*e3+e0*e1)
+        A[2,2]=2*((e0**2+e3**2)-0.5)        
+        
+        return A
+#%%    
 # get B matrix from p and a_bar
 def getB(p, a_bar):
     B     = np.zeros((3, 4))
@@ -164,10 +180,7 @@ def CD_phi(X,C,ft):
     I=X[i_index]
     J=X[j_index]    
     
-    xx=I.q[3:]
-    xx.shape=(1,4)
-    xx=xx[0]
-    A_i=getA(xx)
+    A_i=build_A(I.q[3:])
     A_j=J.A_rotation
 
     r_j=J.q[0:3]

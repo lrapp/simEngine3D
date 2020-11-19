@@ -4,7 +4,7 @@ from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2
 from nue_functions import DP1_nue,CD_nue
 from gamma_functions import gamma_DP1,gamma_CD
 
-from CD import CD_phi
+from CD import CD_phi,CD_PHI_partials
 
 
 #%%

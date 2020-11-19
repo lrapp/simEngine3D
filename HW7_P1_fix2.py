@@ -63,3 +63,4 @@ def main(file):
     X[0].q[3:]=p_i
      
     phi=calc_phi(X,constraint_list,0)
+    partials=calc_partials(X,constraint_list)

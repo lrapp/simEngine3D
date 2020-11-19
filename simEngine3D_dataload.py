@@ -11,7 +11,6 @@ class body():
         self.mass = np.float()
         self.q = np.array([0,0,0,0,0,0,0])
         self.a_bar= np.array([0,0,0],dtype=np.float64)
-        self.A_rotation=np.empty([3,3],dtype=np.float64)
         self.r_dot= np.array([0,0,0],dtype=np.float64)
         self.s_bar = np.array([0,0,0],dtype=np.float64)
         self.normalized= bool()
