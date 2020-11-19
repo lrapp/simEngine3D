@@ -1,47 +1,23 @@
 import numpy as np
 from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
-from simEngine3D_dataload import data_file, DP1_PHI_partials,CD_PHI_partials,DP2_PHI_partials,D_PHI_partials, body
-from nue_functions import DP1_nue,CD_nue
+from simEngine3D_dataload import data_file,DP2_PHI_partials,D_PHI_partials, body
+
 from gamma_functions import gamma_DP1,gamma_CD
 
-from CD import CD_phi,CD_PHI_partials
 
+from CD import *
+from DP1 import *
+#%%
 
+def df(t):
+    return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
+
+def ddf(t):
+    return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
+            np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
 #%%
 def build_p_from_A(A):
     import numpy as np
-    e0=np.sqrt((np.trace(A)+1)/4)
-    if e0==0:
-        print("e0=0")
-    e1=(A[2,1]-A[1,2])/(4*e0)
-    e2=(A[0,2]-A[2,0])/(4*e0)
-    e3=(A[1,0]-A[0,1])/(4*e0)        
-
-    p=np.empty([4,1])
-    p[:,0]=np.array([e0,e1,e2,e3])
-
-    return p
-#%%
-# calculate p given A
-def get_p(A):
-    e0 = np.sqrt(0.25 * (np.trace(A) + 1.))
-    e1 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[0][0]))
-    e2 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[1][1]))
-    e3 = np.sqrt(0.25 * (-np.trace(A) + 1. + 2.* A[2][2]))
-    return np.array([e0, e1, e2, e3])
-
-#%%
-def build_p(theta):
-    import numpy as np
-    A=np.zeros([3,3])
-    A[0,2]=-1
-     
-    A[1,0]=np.sin(theta)
-    A[1,1]=-np.sin(theta)
-    
-    A[2,0]=-np.cos(theta)
-    A[2,1]=-np.sin(theta)
-    
     e0=np.sqrt((np.trace(A)+1)/4)
     if e0==0:
         print("e0=0")
@@ -77,9 +53,6 @@ def build_A(p):
         A[2,2]=2*((e0**2+e3**2)-0.5)        
         
         return A
-        
-
-        
 #%%    
 def build_G(p):
         e0=p[0]
@@ -101,7 +74,7 @@ def build_G(p):
         G[2,2]=-e1
         G[2,3]=e0
         return G
-    
+#%%
 def build_E(p):
         e0=p[0]
         e1=p[1]
@@ -158,22 +131,6 @@ def tilde(a_vector):
     return t
     #%%   
 
-def build_A_angles(phi,theta,psi):
-    import numpy as np
-    A=np.zeros([3,3])    
-    A[0,0]=np.cos(psi)*np.cos(phi)-np.cos(theta)*np.sin(phi)*np.sin(psi)
-    A[0,1]=-np.sin(psi)*np.cos(phi)-np.cos(theta)*np.sin(phi)*np.cos(psi)
-    A[0,2]=np.sin(theta)*np.sin(phi)
-    
-    A[1,0]=np.cos(psi)*np.sin(phi)+np.cos(theta)*np.cos(phi)*np.cos(psi)
-    A[1,1]=-np.sin(psi)*np.sin(phi)+np.cos(theta)*np.cos(phi)*np.cos(psi)
-    A[1,2]=-np.sin(theta)*np.cos(phi)
-    
-    A[2,0]=np.sin(theta)*np.sign(psi)
-    A[2,1]=np.sin(theta)*np.cos(psi)
-    A[2,2]=np.cos(theta)
-    
-    return A
 
 def check_phi(X,cl,time,tol):
     phi=calc_phi(X,cl,time)
@@ -195,9 +152,24 @@ def calc_phi(X,cl,t):
         if i.type.strip(" ' ") == 'CD':
             phi_values.append(CD_phi(X,i,eval(i.f)))
         elif i.type.strip(" ' ") == 'DP1':
-            phi_values.append(phi_dp1(X,i,eval(i.f)))
+            phi_values.append(DP1_phi(X,i,eval(i.f)))
+            
+    body_count=0
+    phi_p=[]
+    for k in X:
+        if k.ground=='False':
+            phi_p.append(0.5*(np.dot(k.q[3:].T[0],k.q[3:].T[0])-1))
+            body_count=body_count+1
+    
+    for i in range(0,len(phi_p)):
+        phi_values.append(phi_p[i])
+        
+        
+    phi=np.zeros(len(phi_values))
+    for i in range(0,len(phi_values)):
+        phi[i]=phi_values[i]
 
-    return phi_values
+    return phi
 
 
 #%%
@@ -205,33 +177,27 @@ def calc_partials(X,cl):
     phi_partials_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                dri,dpi,drj,dpj=CD_PHI_partials(X,i)
-                phi_partials_values.append([drj,dpj])
+                CD_i=CD_PHI_partials(X,i)
+                phi_partials_values.append(CD_i)
             if i.type.strip(" ' ") == 'DP1':
-                dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
-                phi_partials_values.append([drj,dpj])    
-    return phi_partials_values
-#%%
-#
-#def calc_partials2(X,cl):
-#    if X[1].ground:
-#        r_cols=[0,3]
-#        p_cols=[3,7]
-#        cols=7
-#    else:
-#        cols=7*len(X)
-#        
-#    phi_partials_values=np.zeros([len(cl),cols])
-#    counter=0
-#    for i in cl:
-#            if i.type.strip(" ' ") == 'CD':
-#                phi_partials_values[counter,r_cols[0]:r_cols[1]]=CD_PHI_r(X,i)
-#                phi_partials_values[counter,p_cols[0]:p_cols[1]]=CD_PHI_p(X,i)
-#                
-#            if i.type.strip(" ' ") == 'DP1':
-#
-#                
-#    return phi_partials_values
+                DP_1_i=DP1_PHI_partials(X,i)
+                phi_partials_values.append(DP_1_i)    
+        
+    body_count=0
+    for k in X:
+        if k.name=='body i':
+            p_i=k.q[3:]
+        if k.ground=='False':
+            body_count=body_count+1
+        
+    phi_q=np.zeros([len(cl)+body_count,7*body_count])        
+    for i in range(0,len(phi_partials_values)):
+        phi_q[i,:]=phi_partials_values[i]
+        
+    phi_p=np.concatenate((np.zeros([3,1]),p_i))
+    phi_q[-1,:]=phi_p.T
+        
+    return phi_q
 
 #%%
 
@@ -280,25 +246,32 @@ def calc_partials_HW82(X,cl):
             counter=counter+1
                 
     return phi_partials_values
-#%%
-def calc_phi_HW82(X,cl,t):
-    phi_values=[]
-    for i in cl:
-        if i.type.strip(" ' ") == 'CD':
-            phi_values.append(phi_cd(X,i,eval(i.f)))
-        elif i.type.strip(" ' ") == 'DP1':
-            phi_values.append(phi_dp1(X,i,eval(i.f)))
-    return phi_values
+
 #%%
 
-def calc_nue(X,cl,df):
+def calc_nue(X,cl,t):
     nue_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                nue_values.append(CD_nue(X,i,df))
+                nue_values.append(CD_nue(X,i,df(t)))
             if i.type.strip(" ' ") == 'DP1':
-                nue_values.append(DP1_nue(X,i,df))            
-    return nue_values
+                nue_values.append(DP1_nue(X,i,df(t)))            
+
+    nu_p=[]            
+    body_count=0
+    for k in X:
+        if k.ground=='False':
+            nu_p.append(0)
+            body_count=body_count+1
+            
+    for i in range(0,len(nu_p)):
+        nue_values.append(nu_p[i])
+        
+    nue=np.zeros(len(nue_values))
+    for i in range(0,len(nue_values)):
+        nue[i]=nue_values[i]
+    
+    return nue
 
 #%%
 

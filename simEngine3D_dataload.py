@@ -16,6 +16,7 @@ class body():
         self.normalized= bool()
         self.p_dot= np.zeros([4,1])
         self.p_d_dot= np.zeros([4,1])    
+        self.ground=""
 #%%
 def array_dot(V):
     for i in range(0,len(V)-1):
@@ -125,7 +126,10 @@ def data_file(file):
                     q[n]=float(a[n])
                 body_ob_list[k].r_dot = q        
             if  list(i.keys())[0] == "Need normalized":
-                body_ob_list[k].normalized= list(i.values())[0].strip(" ' ")                            
+                body_ob_list[k].normalized= list(i.values())[0].strip(" ' ")         
+                
+            if  list(i.keys())[0] == "ground":
+                body_ob_list[k].ground= list(i.values())[0].strip(" ' ")
         
         body_list.append(x)
         start_count_index=st+1
@@ -137,25 +141,25 @@ def data_file(file):
             
         
     #Assemble rotation matrix A using the values e0-e3 provided
-    A_list=[]
-    for i in range(0,len(body_ob_list)):
-        A=np.empty([3,3])
-
-        for k in range(0,len(A)):
-            A[k,k]=2*((body_ob_list[i].q[3]**2)+(body_ob_list[i].q[4+k]**2)-0.5)
-        A[0,1]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[5]-body_ob_list[i].q[3]*body_ob_list[i].q[6])
-        A[0,2]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[5])
-        
-        A[1,0]=2*((body_ob_list[i].q[4]*body_ob_list[i].q[5]+body_ob_list[i].q[3]*body_ob_list[i].q[6]))
-        A[1,2]=2*(body_ob_list[i].q[5]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[4])
-        
-        A[2,0]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[5])
-        A[2,1]=2*((body_ob_list[i].q[5]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[4]))
-    
-        A_list.append(A)
-    
-    for i in range(0,len(A_list)):
-        body_ob_list[i].A_rotation=A_list[i]
+#    A_list=[]
+#    for i in range(0,len(body_ob_list)):
+#        A=np.empty([3,3])
+#
+#        for k in range(0,len(A)):
+#            A[k,k]=2*((body_ob_list[i].q[3]**2)+(body_ob_list[i].q[4+k]**2)-0.5)
+#        A[0,1]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[5]-body_ob_list[i].q[3]*body_ob_list[i].q[6])
+#        A[0,2]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[5])
+#        
+#        A[1,0]=2*((body_ob_list[i].q[4]*body_ob_list[i].q[5]+body_ob_list[i].q[3]*body_ob_list[i].q[6]))
+#        A[1,2]=2*(body_ob_list[i].q[5]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[4])
+#        
+#        A[2,0]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[5])
+#        A[2,1]=2*((body_ob_list[i].q[5]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[4]))
+#    
+#        A_list.append(A)
+#    
+#    for i in range(0,len(A_list)):
+#        body_ob_list[i].A_rotation=A_list[i]
         
 
             
