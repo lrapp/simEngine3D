@@ -2,8 +2,6 @@ import numpy as np
 from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
 from simEngine3D_dataload import data_file,DP2_PHI_partials,D_PHI_partials, body
 
-from gamma_functions import gamma_DP1,gamma_CD
-
 
 from CD import *
 from DP1 import *
@@ -194,6 +192,7 @@ def calc_partials(X,cl):
     for i in range(0,len(phi_partials_values)):
         phi_q[i,:]=phi_partials_values[i]
         
+    p_i.shape=(4,1)
     phi_p=np.concatenate((np.zeros([3,1]),p_i))
     phi_q[-1,:]=phi_p.T
         
@@ -275,14 +274,32 @@ def calc_nue(X,cl,t):
 
 #%%
 
-def calc_gamma(X,cl,ddf):
+def calc_gamma(X,cl,t):
     gamma_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                gamma_values.append(gamma_CD(X,i,ddf))
+                gamma_values.append(gamma_CD(X,i,ddf(t)))
             if i.type.strip(" ' ") == 'DP1':
-                gamma_values.append(gamma_DP1(X,i,ddf))
-    return gamma_values
+                gamma_values.append(gamma_DP1(X,i,ddf(t)))
+                
+    gamma_p=[]            
+    body_count=0
+    for k in X:
+        if k.ground=='False':
+            p_dot=k.p_dot
+            p_dot.shape=(4)
+            gamma_p.append(-np.dot(p_dot,p_dot))
+            body_count=body_count+1
+            
+    for i in range(0,len(gamma_p)):
+        gamma_values.append(gamma_p[i])
+        
+    gamma=np.zeros(len(gamma_values))
+    for i in range(0,len(gamma_values)):
+        gamma[i]=gamma_values[i]
+                    
+            
+    return gamma
 
 #%%
 def build_ja(X,phi_partials_values):
@@ -306,3 +323,25 @@ def build_ja(X,phi_partials_values):
 #        jacobian[5+k,3:]=2*X[k].q[3:].T
                 
     return jacobian
+#%%
+def getJp(p, m, w, L):
+    # here L is the length of pendulum
+    # in L-RF
+    J_bar = 1./12. * m * np.array([2.* w**2, L**2 + w**2, L**2 + w**2]) * np.eye(3)
+    G = getG(p)
+
+    return 4. * np.matmul(np.transpose(G), np.matmul(J_bar, G))
+
+#%%
+def getG(p):
+    e0, e1, e2, e3 = p[0], p[1], p[2], p[3]
+    return np.array([[-e1, e0, e3, -e2],
+                     [-e2, -e3, e0, e1],
+                     [-e3, e2, -e1, e0]])
+    
+#%%
+def getE(p):
+    e0, e1, e2, e3 = p[0], p[1], p[2], p[3]
+    return np.array([[-e1, e0, -e3, e2],
+                     [-e2, e3, e0, -e1],
+                     [-e3, -e2, e1, e0]])

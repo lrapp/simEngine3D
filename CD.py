@@ -125,44 +125,25 @@ def CD_PHI_partials(X,C):
     A_i=build_A(I.q[3:])
     A_j=build_A(J.q[3:])
     
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-    
-    
-    #define G and p_dot
 
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-    
     p_i=I.q[3:]
     p_j=J.q[3:]
     
     s_bar_i=C.s_bar_i
     s_bar_j=C.s_bar_j
     
-    a_j=np.dot(A_j,a_bar_j)
-    a_i=np.dot(A_i,a_bar_i)
-    a_i_T=np.transpose(a_i)
 
-
-    a_bar_tilde_i=tilde(a_bar_i)
-
-    a_bar_tilde_j=tilde(a_bar_j)
-    a_bar_tilde_j_T=np.transpose(a_bar_tilde_j)
     
-    B_i=build_B(p_i,s_bar_i)
-    B_j=build_B(p_j,s_bar_j)
+    p_i.shape=(4,1)
+    s_bar_i.shape=(3,1)
     
     c=C.c
     c_T=np.transpose(c)
     
     first=-c_T
-    second=np.dot(-c_T,B_i)
+    second=np.dot(-c_T,build_B(p_i,s_bar_i))
     third=c_T
-    fourth=np.dot(c_T,B_j)
+    fourth=np.dot(c_T,build_B(p_j,s_bar_j))
     
     if J.ground=='True':
         r_v = np.concatenate((first[0],second[0]))
@@ -191,21 +172,21 @@ def CD_phi(X,C,ft):
     A_j=build_A(J.q[3:])
 
     r_j=J.q[0:3]
+    r_j.shape=(3)
     s_bar_j=C.s_bar_j
     
     r_i=I.q[0:3]
+    r_i.shape=(3)
     s_bar_i=C.s_bar_i
              
-    c_T=np.transpose(C.c)
+    c_T=np.transpose(C.c)[0]
     
-    if np.count_nonzero(s_bar_j) == 0:
-        d_ij=(-r_i-np.dot(A_i,s_bar_i))
-    elif np.count_nonzero(s_bar_i) == 0:
-        d_ij=(r_j+np.dot(A_j,s_bar_j))
-    else:
-        d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
-    
-    PHI_CD=np.dot(c_T,d_ij)-ft
+    s_j_Q=np.matmul(A_j,s_bar_j)
+    s_j_Q.shape=(3)
+    s_i_P=np.matmul(A_i,s_bar_i)
+    s_i_P.shape=(3)
+
+    PHI_CD=np.dot(c_T,r_j+s_j_Q-r_i-s_i_P)-ft
                         
     return float(PHI_CD)  
 
