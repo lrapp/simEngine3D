@@ -10,7 +10,7 @@ from simEngine3D_functions import *
 
 
 tic=ttime.perf_counter()
-h=0.001
+h=0.01
 
 
 L=2
@@ -42,7 +42,7 @@ p_dd_list=[]
 lambda_p_list=[]
 lagrange_list=[]
          
-file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint_fix2.txt"
+file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
 X=data_file(file)
 constraint_list=constraints_in(file)
 
@@ -71,12 +71,11 @@ else:
     print("initial conditions satisfy PHI_P=0")
 
 phi_q=calc_partials(X,constraint_list)    
+#
+#nue_values=calc_nue(X,constraint_list,df)
+#
+#q_i_dot=np.linalg.solve(phi_q,nue_values)
 
-nue_values=calc_nue(X,constraint_list,df)
-q_i_dot=np.linalg.solve(phi_q,nue_values)
-
-X[0].r_dot=q_i_dot[:3]
-X[0].p_dot=q_i_dot[3:]
 
 phi_r=phi_q[:,0:3]
 phi_p=phi_q[:,3:]
@@ -85,7 +84,7 @@ phi_r=phi_r[0:6]
 phi_p=phi_p[0:6]
 
 gamma_values=calc_gamma(X,constraint_list,ddf)
-q_i_ddot=np.linalg.solve(phi_q,gamma_values)
+#q_i_ddot=np.linalg.solve(phi_q,gamma_values)
 
 M=m*np.identity(3)
 J_bar=np.zeros([3,3])
@@ -130,6 +129,7 @@ RHS[8:14]=gamma_hat
 
 
 unknowns=np.dot(np.linalg.inv(LHS),RHS)    
+
 r_dd_list.append(unknowns[0:3])
 p_dd_list.append(unknowns[3:7])
 lambda_p_list.append(unknowns[7:8])
@@ -152,6 +152,8 @@ torque_list=[0]
 nue_list=[]
 vel_violation=[]
 
+q_i_dot_list=[]
+
 #%%
 #start steps on slide 641
 n=1
@@ -173,10 +175,10 @@ for ii in range(1,len(time_list)):
     z_0[7:8]=lambda_p_list[n-1]
     z_0[8:14]=lagrange_list[n-1]
     
-    tol=1e-4
+    tol=1e-3
     error=1
     count=1
-    while abs(error) > tol and count < 100:
+    while abs(error) > tol and count < 150:
         
         if count == 1:
             if n==1: #use first order to seed 
@@ -279,15 +281,17 @@ for ii in range(1,len(time_list)):
         z=z+delta_z
         error=np.linalg.norm(delta_z)
         count=count+1
-        if count > 99:
+        if count > 150:
             print("did not converge")
+            break
+       
+#    nue_values=calc_nue(X_n,constraint_list,df)
+#    q_i_dot=np.linalg.solve(phi_q,nue_values)
+#    q_i_dot_list.append(q_i_dot)
     
-    nue_values=calc_nue(X_n,constraint_list,df)
-    q_i_dot=np.linalg.solve(phi_q,nue_values)
-    
-    nue_list.append(q_i_dot)
-    vel=phi_r @ r_d + phi_p @ p_d
-    vel_violation.append(np.linalg.norm(vel))
+#    nue_list.append(nue_values)
+#    vel=phi_r @ r_d + phi_p @ p_d
+#    vel_violation.append(np.linalg.norm(vel))
     r_list[:,n:n+1]=r
     p_list[:,n:n+1]=p
 
@@ -299,15 +303,13 @@ for ii in range(1,len(time_list)):
     lagrange_list.append(z[8:14])
     lambda_p_list.append(z[7:8])
     
-    G=build_G(p)
-    
-    torque=[]
-    for kk in range(0,len(constraint_list)):
-        torque.append(-1/2*G @ phi_p[kk,:] * z[8+kk])
-        
-#    torque=-0.5*(G @ phi_p[5] * z[13:14])
-#    torque=phi_p.T @ z[8:14] + P.T @ z[7:8]
-    torque_list.append(torque)
+#    G=build_G(p)
+#    
+#    torque=[]
+#    for kk in range(0,len(constraint_list)):
+#        torque.append(-1/2*G @ phi_p[kk,:] * z[8+kk])
+#    torque_list.append(torque)
+
     n=n+1
 
 toc=ttime.perf_counter()
@@ -319,13 +321,13 @@ print(elapsed_time)
 xx=r_list[0,:]
 yy=r_list[1,:]
 zz=r_list[2,:]
-
+ttt=time_list[:]
 fig, axs = plt.subplots(3)
-axs[0].plot(time_list,xx)
+axs[0].plot(ttt,xx)
 axs[0].set(ylabel='x')
-axs[1].plot(time_list,yy)
+axs[1].plot(ttt,yy)
 axs[1].set(ylabel='y')
-axs[2].plot(time_list,zz)
+axs[2].plot(ttt,zz)
 axs[2].set(ylabel='z')
 axs[2].set(xlabel='time')
 
