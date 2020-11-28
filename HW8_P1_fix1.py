@@ -10,7 +10,7 @@ from simEngine3D_functions import *
 
 
 tic=ttime.perf_counter()
-h=0.01
+h=0.0001
 
 
 L=2
@@ -175,7 +175,7 @@ for ii in range(1,len(time_list)):
     z_0[7:8]=lambda_p_list[n-1]
     z_0[8:14]=lagrange_list[n-1]
     
-    tol=1e-3
+    tol=1e-4
     error=1
     count=1
     while abs(error) > tol and count < 150:
@@ -305,10 +305,10 @@ for ii in range(1,len(time_list)):
     
 #    G=build_G(p)
 #    
-#    torque=[]
-#    for kk in range(0,len(constraint_list)):
-#        torque.append(-1/2*G @ phi_p[kk,:] * z[8+kk])
-#    torque_list.append(torque)
+    torque=[]
+    for kk in range(0,len(constraint_list)):
+        torque.append(-1/2*build_G(p) @ phi_p[kk,:] * z[8+kk])
+    torque_list.append(torque)
 
     n=n+1
 
@@ -331,50 +331,50 @@ axs[2].plot(ttt,zz)
 axs[2].set(ylabel='z')
 axs[2].set(xlabel='time')
 
-#%%calculate omega
-E_list=[]
-for i in range(0,max(p_list.shape)):
-    E_list.append(build_E(p_list[:,i]))
-
-omega_list=np.zeros([3,max(p_list.shape)])
-for i in range(0,max(p_d_list.shape)):
-    omega=2*(np.dot(E_list[i], p_d_list[:,i]))
-    omega.shape=(3,1)
-    omega_list[:,i:i+1]=omega
-
-#%%
-
-
-omega_x=omega_list[0,:]
-omega_y=omega_list[1,:]
-omega_z=omega_list[2,:]
-
-fig, axs = plt.subplots(3)
-axs[0].plot(time_list,omega_x)
-axs[0].set(ylabel='omega x')
-axs[1].plot(time_list,omega_y)
-axs[1].set(ylabel='omega y')
-axs[2].plot(time_list,omega_z)
-axs[2].set(ylabel='omega z')
-axs[2].set(xlabel='time')
-
-
-
-#%%
-torque1=[0]
-for i in range(1,len(torque_list)):
-    torque1.append(torque_list[i][-1][2])
-    
-plt.plot(time_list,torque1)
-plt.ylabel('Torque')
-plt.xlabel('Time')
-#%%
-nue_array=np.zeros([len(time_list)-1,6])
-violation_list=[0]
-for i in range(0,len(nue_list)):
-    nue_array[i,:]=nue_list[i]
-    violation_list.append(np.linalg.norm(nue_array[i,:]))
-
-plt.plot(time_list,violation_list)
-plt.ylabel('2-Norm of Velocity Violation')
-plt.xlabel('Time')
+##%%calculate omega
+#E_list=[]
+#for i in range(0,max(p_list.shape)):
+#    E_list.append(build_E(p_list[:,i]))
+#
+#omega_list=np.zeros([3,max(p_list.shape)])
+#for i in range(0,max(p_d_list.shape)):
+#    omega=2*(np.dot(E_list[i], p_d_list[:,i]))
+#    omega.shape=(3,1)
+#    omega_list[:,i:i+1]=omega
+#
+##%%
+#
+#
+#omega_x=omega_list[0,:]
+#omega_y=omega_list[1,:]
+#omega_z=omega_list[2,:]
+#
+#fig, axs = plt.subplots(3)
+#axs[0].plot(time_list,omega_x)
+#axs[0].set(ylabel='omega x')
+#axs[1].plot(time_list,omega_y)
+#axs[1].set(ylabel='omega y')
+#axs[2].plot(time_list,omega_z)
+#axs[2].set(ylabel='omega z')
+#axs[2].set(xlabel='time')
+#
+#
+#
+##%%
+#torque1=[0]
+#for i in range(1,len(torque_list)):
+#    torque1.append(torque_list[i][-1][2])
+#    
+#plt.plot(time_list,torque1)
+#plt.ylabel('Torque')
+#plt.xlabel('Time')
+##%%
+#nue_array=np.zeros([len(time_list)-1,6])
+#violation_list=[0]
+#for i in range(0,len(nue_list)):
+#    nue_array[i,:]=nue_list[i]
+#    violation_list.append(np.linalg.norm(nue_array[i,:]))
+#
+#plt.plot(time_list,violation_list)
+#plt.ylabel('2-Norm of Velocity Violation')
+#plt.xlabel('Time')
