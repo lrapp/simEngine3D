@@ -153,3 +153,59 @@ def gamma_D(X,ddft):
     
     
     return float(gamma_D)
+#%%
+def D_PHI_partials(X):
+      #Set bodys i and j 
+    for i in X:
+        if i.name == "body i":
+            i_index=X.index(i)
+        if i.name == "body j":
+            j_index=X.index(i) 
+            
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=I.a_bar
+    a_bar_j=J.a_bar
+    A_i=build_A(I.q[3:])
+    A_j=build_A(J.q[3:])
+    
+    #Performe some transposes 
+    a_bar_i_T=np.transpose(a_bar_i)
+    a_bar_j_T=np.transpose(a_bar_j)
+    A_i_T=np.transpose(A_i)
+    A_j_T=np.transpose(A_j)
+
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    p_dot_i=I.p_dot
+    p_dot_j=J.p_dot
+
+    s_bar_j=J.s_bar
+    s_bar_i=I.s_bar
+    
+    r_i=I.q[:3]
+    r_j=J.q[:3]
+    
+    a_j=np.dot(J.A_rotation,J.a_bar)
+    a_i=np.dot(I.A_rotation,I.a_bar)
+    a_i_T=np.transpose(a_i)
+
+
+    a_bar_tilde_i=tilde(a_bar_i)
+    a_bar_tilde_j=tilde(a_bar_j)
+    a_j_T=np.transpose(a_j)
+    
+
+    B_p_i__s_bar_i=build_B(p_i,s_bar_i)
+    B_p_j__s_bar_j=build_B(p_j,s_bar_j)
+    
+    d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
+    d_ij_T=np.transpose(d_ij)    
+    
+    PHI_DP1_p_i=-2*np.dot(d_ij_T,B_p_i__s_bar_i)
+    PHI_DP1_p_j=2*np.dot(d_ij_T,B_p_j__s_bar_j)
+    PHI_DP1_r_i=-2*d_ij_T
+    PHI_DP1_r_j=2*d_ij_T    
+    
+    return PHI_DP1_r_i[0], PHI_DP1_r_j[0],PHI_DP1_p_i[0],PHI_DP1_p_j[0]
