@@ -10,7 +10,7 @@ from simEngine3D_functions import *
 
 
 tic=ttime.perf_counter()
-h=0.0001
+h=0.0005
 
 
 L=2
@@ -20,7 +20,7 @@ rho=7800
 m=rho*volume
 
 counter=0
-time_list=np.arange(0,10,h)
+time_list=np.arange(0,1,h)
                        
 time=time_list[0]
 
@@ -175,7 +175,7 @@ for ii in range(1,len(time_list)):
     z_0[7:8]=lambda_p_list[n-1]
     z_0[8:14]=lagrange_list[n-1]
     
-    tol=1e-4
+    tol=1e-6
     error=1
     count=1
     while abs(error) > tol and count < 150:
