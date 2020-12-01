@@ -13,6 +13,135 @@ def df(t):
 def ddf(t):
     return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
             np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
+    
+#%%
+def build_M(SYS):
+    M=np.zeros((3*SYS.nb,3*SYS.nb))
+    for i in range(0,SYS.nb):
+        for j in range(0,3):
+            M[3*i+j,3*i+j]=SYS.bodies[i].mass
+    return M
+#%%
+def build_JP(SYS):
+    J_P=np.zeros((4*SYS.nb,4*SYS.nb))
+    for i in range(0,SYS.nb):
+        G=build_G(SYS.bodies[i].q[3:])
+        J_bar=J_bar_bar(SYS.bodies[i])
+        J_P[0+(4*i):4+4*i,0+(4*i):4+4*i]=4*np.dot(np.dot(np.transpose(G),J_bar),G)    
+
+    return J_P
+
+#%%
+def build_P(SYS):
+    P=np.zeros([SYS.nb,SYS.nb*4])
+    for i in range(0,SYS.nb):
+        P[i,:]=np.transpose(SYS.bodies[i].q[3:])
+        
+    return P
+
+#%%
+def build_F(SYS):
+    F=np.zeros([3*SYS.nb])
+    for i in range(0,SYS.nb):
+        F[0+3*i:3+3*i]=SYS.bodies[i].gravity
+           
+    F.shape=(3,1)
+    return F
+#%%
+def build_tau_hat(SYS):
+    tau_hat=np.zeros((4*SYS.nb,1))
+    for i in range(0,SYS.nb):
+        G_dot=build_G(SYS.bodies[i].p_dot)
+        J_bar=J_bar_bar(SYS.bodies[i])        
+        tau_hat[0+4*i:4+4*i]=8*np.dot(np.dot(np.dot(G_dot.T,J_bar),G_dot),SYS.bodies[i].q[3:])        
+        
+    return tau_hat
+#%%
+def build_gamma_p(SYS):
+    gamma_p=np.zeros((SYS.nb,1))
+    for i in range(0,SYS.nb):
+        gamma_p[i]=-2*np.dot(SYS.bodies[0].p_dot.T,SYS.bodies[0].p_dot) #slide 473
+    
+    return gamma_p
+    
+#%%
+def J_bar_bar(X):
+    m=X.mass
+    J_bar=np.zeros((3,3))
+    L=X.dimensions[0]    
+    b=X.dimensions[1]/2
+    c=X.dimensions[2]/2
+    
+    J_bar[0,0]=1/12*m*(b**2+c**2)
+    J_bar[1,1]=1/12*m*(L**2+c**2)
+    J_bar[2,2]=1/12*m*(L**2+b**2)
+    
+    return J_bar
+    
+
+
+#%%
+def body_count(X):
+    count=0
+    for i in X:
+        if i.ground == 'True':
+            count=count
+        else:
+            count=count+1
+    return count
+    
+#%%
+def compute_accel(SYS):
+    
+    SYS.M=build_M(SYS)
+    SYS.J_P=build_JP(SYS)
+    SYS.P=build_P(SYS)
+    SYS.F=build_F(SYS)
+    SYS.tau_hat=build_tau_hat(SYS)
+    SYS.gamma_p=build_gamma_p(SYS)
+    SYS.gamma=calc_gamma(SYS.bodies,SYS.constraints,ddf(0))
+    
+    SYS.gamma_hat=SYS.gamma[0:SYS.nc] #remove euler constraint here
+    SYS.gamma_hat.shape=(SYS.nc,1)
+    
+    
+    SYS.phi_q=calc_partials(SYS.bodies,SYS.constraints)    
+    phi_r=SYS.phi_q[:,0:3*nb]
+    phi_p=SYS.phi_q[:,nb*3:]
+    
+    phi_r=phi_r[0:SYS.nc] #don't consider euler constraint
+    phi_p=phi_p[0:SYS.nc]
+    
+    
+    RHS=np.zeros([3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,1])
+    RHS[0:3*SYS.nb]=SYS.F
+    RHS[3*SYS.nb:3*SYS.nb+4*SYS.nb]=SYS.tau_hat
+    RHS[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]=SYS.gamma_p
+    RHS[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=SYS.gamma_hat
+
+    #sizes taken from slide 667 of all fall 2020 lectures       
+    LHS=np.zeros([3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc])
+    LHS[0:3*SYS.nb,0:3*SYS.nb]=SYS.M
+    LHS[0:3*SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=phi_r.T       
+    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb:3*SYS.nb+4*nb]=SYS.J_P    
+    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]=P.T
+    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=phi_p.T
+    LHS[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb,3*SYS.nb:3*SYS.nb+4*SYS.nb]=P
+    LHS[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,0:3*SYS.nb]=phi_r
+    LHS[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,3*SYS.nb:3*SYS.nb+4*SYS.nb]=phi_p       
+    
+    unknowns=np.dot(np.linalg.inv(LHS),RHS)    
+    
+    SYS.ddr=unknowns[0:3*SYS.nb]
+    SYS.ddp=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]    
+    SYS.lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
+    SYS.lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+    
+    
+    
+    
+    
+
 #%%
 def build_p_from_A(A):
     import numpy as np
@@ -142,6 +271,16 @@ def check_phi(X,cl,time,tol):
         print("initial conditions satisfy phi=0")
     return 
     
+
+#%%
+def check_euler(X,cl,time,tol):
+    PHI_P=1/2*(X[1].q[3:].T @ X[1].q[3:]) - 1/2
+    if PHI_P > tol:
+        print("initial conditions do not satisfy PHI_P=0")
+    else:
+        print("initial conditions satisfy PHI_P=0")   
+    return
+
 #%%
 
 def calc_phi(X,cl,t):
@@ -168,6 +307,7 @@ def calc_phi(X,cl,t):
         phi[i]=phi_values[i]
 
     return phi
+
 
 
 #%%

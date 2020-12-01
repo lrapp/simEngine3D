@@ -8,11 +8,41 @@ Restarting with pieces of my SimEngine3D from homework.  Starting over here for 
 import os
 os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")
 from simEngine3D_dataload import data_file, constraints_in
-import tkinter as tk
-from tkinter import ttk
+from simEngine3D_functions import *
+from CD import *
+from DP1 import *
+from DP2 import *
+from D import *
+#%%
 
 
 
-X=data_file("C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint_fix.txt") #list of body objects
-constraint_list=constraints_in("C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint_fix.txt") #list of constraints
+class sys():
+    def __init__(self):    
+        self.nb=0 #number of bodies
+        self.bodies=[] #list of bodie objects
+        self.constraints=[] #list of constraints
+    
 
+def dynamic_analysis(sys,t_start,t_step,t_end):
+    SYS=sys()
+    
+    time_list=np.arange(t_start,t_end,t_step)
+    
+    SYS.bodies=data_file("C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt") #list of body objects
+    SYS.constraints=constraints_in("C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt") #list of constraints
+
+    SYS.nb=body_count(SYS.bodies)
+    SYS.nc=len(SYS.constraints)
+    
+
+    
+    
+    #calculate intial position and velocity
+    tol=1e-5
+    check_phi(SYS.bodies,SYS.constraints,0,tol)    
+    check_euler(SYS.bodies,SYS.constraints,0,tol)  
+    
+
+        
+                                    

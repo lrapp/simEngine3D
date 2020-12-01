@@ -37,22 +37,21 @@ def data_file(file):
     with open(file,'r') as f:
         contents=f.readlines()
         
-    #%% Create empty lists
+    #%Create empty lists
     
     bodys=[]
     body_list=[]
     body_ob_list=[]
       
         
-    #%%
     bodys_index=contents.index('bodies:\n') #Know where to start reading in body information
     constraints_index=contents.index('constraints:\n') #Know where to start reading in constraint information.
     
-    #%%Read all lines between bodys and constraint information
+    #Read all lines between bodys and constraint information
     for i in range(bodys_index,constraints_index-1):
         bodys.append(contents[i].strip())
         
-    #%%
+    #
     start_count_index=0
     end_count_index=0
     count=bodys.count("{") #Count how many left squigly brakets there are, this gives how many bodies there are in the system
@@ -130,6 +129,28 @@ def data_file(file):
                 
             if  list(i.keys())[0] == "ground":
                 body_ob_list[k].ground= list(i.values())[0].strip(" ' ")
+
+            if  list(i.keys())[0] == "type":
+                body_ob_list[k].type= list(i.values())[0].strip(" ' ")                
+                
+            if  list(i.keys())[0] == "dimensions":
+                a=list(i.values())[0].strip()
+                a=a.strip("[")
+                a=a.strip("]")
+                a=a.split(",")
+                q=np.zeros((3),dtype=float)
+                for n in range(0,len(a)):
+                    q[n]=float(a[n])
+                body_ob_list[k].dimensions= q  
+            if  list(i.keys())[0] == "gravity":
+                a=list(i.values())[0].strip()
+                a=a.strip("[")
+                a=a.strip("]")
+                a=a.split(",")
+                q=np.zeros((3),dtype=float)
+                for n in range(0,len(a)):
+                    q[n]=float(a[n])
+                body_ob_list[k].gravity= q                                
         
         body_list.append(x)
         start_count_index=st+1

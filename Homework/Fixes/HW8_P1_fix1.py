@@ -10,7 +10,7 @@ from simEngine3D_functions import *
 
 
 tic=ttime.perf_counter()
-h=0.0005
+h=0.01
 
 
 L=2
@@ -87,6 +87,7 @@ gamma_values=calc_gamma(X,constraint_list,ddf)
 #q_i_ddot=np.linalg.solve(phi_q,gamma_values)
 
 M=m*np.identity(3)
+
 J_bar=np.zeros([3,3])
 
 b=0.05/2
@@ -99,6 +100,8 @@ J_bar[2,2]=1/12*m*(L**2+b**2)
 G=build_G(X[0].q[3:])
            
 J_P=4*np.dot(np.dot(np.transpose(G),J_bar),G)    
+
+
 P=np.zeros([1,4])
 P[0,:]=np.transpose(X[0].q[3:])
 
@@ -175,49 +178,62 @@ for ii in range(1,len(time_list)):
     z_0[7:8]=lambda_p_list[n-1]
     z_0[8:14]=lagrange_list[n-1]
     
-    tol=1e-6
+    tol=1e-2
     error=1
     count=1
-    while abs(error) > tol and count < 150:
+    while abs(error) > tol and count < 400:
         
         if count == 1:
             if n==1: #use first order to seed 
                 z=z_0
                 beta_0=1
-                alpha1=1
-                C_r_n=alpha1*r_list[:,n-1]
-                C_r_n.shape=(3,1)
-                C_p_n=alpha1*p_list[:,n-1]
-                C_p_n.shape=(4,1)
+                alpha1=-1
                 
-                C_r_dot_n=alpha1*r_d_list[:,n-1]
-                C_r_dot_n.shape=(3,1)
-                C_p_dot_n=alpha1*p_d_list[:,n-1]
+                C_r_dot_n=-alpha1*r_d_list[:,n-1]
+                C_r_n=-alpha1*r_list[:,n-1]+beta_0*h*C_r_dot_n
+                                    
+                C_r_dot_n.shape=(3,1)                                    
+                C_r_n.shape=(3,1)
+                
+                
+                C_p_dot_n=-alpha1*p_d_list[:,n-1]
+                C_p_n=-alpha1*p_list[:,n-1]+beta_0*h*C_p_dot_n
+                
+                C_p_n.shape=(4,1)
                 C_p_dot_n.shape=(4,1)                
+                
+                
             else:
                 z=z_0
                 beta_0=2/3
-                C_r_n=4/3*r_list[:,n-1]-1/3*r_list[:,n-2]
-                C_r_n.shape=(3,1)                
-                C_p_n=4/3*p_list[:,n-1]-1/3*p_list[:,n-2]
-                C_p_n.shape=(4,1)
                 
-                C_r_dot_n=4/3*r_d_list[:,n-1]-1/3*r_d_list[:,n-2]
-                C_r_dot_n.shape=(3,1)
-                C_p_dot_n=4/3*p_d_list[:,n-1]-1/3*p_d_list[:,n-2]
-                C_p_dot_n.shape=(4,1)
-    
+                alpha_1=-4/3
+                alpha_2=1/3
+                
+                C_r_dot_n=-alpha_1*r_d_list[:,n-1]-alpha_2*r_d_list[:,n-2]
+   
+                C_p_dot_n=-alpha_1*p_d_list[:,n-1]-alpha_2*p_d_list[:,n-2]
+
+
+                C_r_n=-alpha_1*r_list[:,n-1]-alpha_2*r_list[:,n-2]+beta_0*h*C_r_dot_n
+                C_p_n=-alpha_1*p_list[:,n-1]-alpha_2*p_list[:,n-2]+beta_0*h*C_p_dot_n
+                
+                C_r_dot_n.shape=(3,1)                                     
+                C_r_n.shape=(3,1)                      
+                C_p_n.shape=(4,1)
+                C_p_dot_n.shape=(4,1)                
+                
                 
         else:
             z=z
-         
-            
+
+              
             
         lambda_p=z[7:8]             
         lagrange=z[8:14]
         
-        r=C_r_n+(beta_0**2)*(h**2)*z[0:3]
-        p=C_p_n+(beta_0**2)*(h**2)*z[3:7]        
+        r=C_r_n+beta_0**2*h**2*z[0:3]
+        p=C_p_n+beta_0**2*h**2*z[3:7]        
     
         r_d=C_r_dot_n+beta_0*h*z[0:3]
         p_d=C_p_dot_n+beta_0*h*z[3:7]        
@@ -281,8 +297,9 @@ for ii in range(1,len(time_list)):
         z=z+delta_z
         error=np.linalg.norm(delta_z)
         count=count+1
-        if count > 150:
-            print("did not converge")
+        if count > 399:
+            print("did not converge, n=",str(n))
+            print(str(error))
             break
        
 #    nue_values=calc_nue(X_n,constraint_list,df)
@@ -305,11 +322,11 @@ for ii in range(1,len(time_list)):
     
 #    G=build_G(p)
 #    
-    torque=[]
-    for kk in range(0,len(constraint_list)):
-        torque.append(-1/2*build_G(p) @ phi_p[kk,:] * z[8+kk])
-    torque_list.append(torque)
-
+#    torque=[]
+#    for kk in range(0,len(constraint_list)):
+#        torque.append(-1/2*build_G(p) @ phi_p[kk,:] * z[8+kk])
+#    torque_list.append(torque)
+#
     n=n+1
 
 toc=ttime.perf_counter()

@@ -9,16 +9,20 @@ flags:
 #Enter body information
 can enter either normalized or not normalized p values, if not normalized you must mark the 'Need normalized' flag 'True'
 must enter normalized p_dot values
+dimensions = [L,b,c] where b & c are cross section dimensions of bar and L is length
 bodies:
 [
 	{
 	'name': 'body i'
 	'ID': 1
-	'mass': 1
-	'q(x,y,z,e0,e1,e2,e3)': [0,0,0,0,0,0,0]
+	'mass': 39
+	'type': bar
+	'dimensions' : [2,0.05,0.05]
+	'q(x,y,z,e0,e1,e2,e3)': [0,1.41421356,-1.41421356,0.653281459,0.270598060,0.653281506,0.27059804]
 	'p_dot' : [0,0,0,0]
 	'Need normalized': False
 	'ground' : False
+	'gravity' : [0,0,-9.81]
 
 	}
 	,
