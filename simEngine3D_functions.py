@@ -137,15 +137,47 @@ def compute_accel(SYS):
     SYS.lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
     SYS.lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
     
+   
+    
 #%%
 
-def build_DF(time_list):
+def build_DF(SYS,time_list):
     outputs=pd.DataFrame(time_list,columns=["time"])
-    cols=["r","dr","ddr","p","dp","ddp","lambda_p","lagrange"]
-    for i in cols:
-        outputs[i]=np.zeros(len(time_list))
+    SYS.cols=["r","dr","ddr","p","dp","ddp","lambda_p","lagrange"]
+    for j in range(0,SYS.nb+1):
+        for i in SYS.cols:
+            if "r" in i:
+                outputs[i+str(j)]=[np.zeros([3,1])]*len(outputs)
+            if "p" in i:
+                outputs[i+str(j)]=[np.zeros([4,1])]*len(outputs)
+            if "lambda_p" in i:
+                outputs[i+str(j)]=[np.zeros([SYS.nb,1])]*len(outputs)
+            if "lagrange" in i:
+                outputs[i+str(j)]=[np.zeros([SYS.nc,1])]*len(outputs)
+            
         
     return outputs
+
+    
+#%%
+def update_level0(SYS):
+    update_cols=[]
+    for i in range(0,SYS.nb+1):
+        update_i=[]
+        for j in SYS.cols:
+            if len(j) ==1:
+                update_i.append(j+str(i))
+        update_cols.append(update_i)
+
+    for i in update_cols:
+        body=int(i[0])
+        for j in i:
+            if "r" in j:
+                SYS.outputs.loc[SYS.n,j]=body.q[:3]
+            else:
+                SYS.outputs.loc[SYS.n,j]=body.q[3:]
+
+            
 #%%
 def build_p_from_A(A):
     import numpy as np
