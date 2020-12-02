@@ -1,7 +1,7 @@
 import numpy as np
 from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
 from simEngine3D_dataload import data_file,DP2_PHI_partials,D_PHI_partials, body
-
+import pandas as pd
 
 from CD import *
 from DP1 import *
@@ -106,8 +106,8 @@ def compute_accel(SYS):
     
     
     SYS.phi_q=calc_partials(SYS.bodies,SYS.constraints)    
-    phi_r=SYS.phi_q[:,0:3*nb]
-    phi_p=SYS.phi_q[:,nb*3:]
+    phi_r=SYS.phi_q[:,0:3*SYS.nb]
+    phi_p=SYS.phi_q[:,SYS.nb*3:]
     
     phi_r=phi_r[0:SYS.nc] #don't consider euler constraint
     phi_p=phi_p[0:SYS.nc]
@@ -123,10 +123,10 @@ def compute_accel(SYS):
     LHS=np.zeros([3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc])
     LHS[0:3*SYS.nb,0:3*SYS.nb]=SYS.M
     LHS[0:3*SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=phi_r.T       
-    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb:3*SYS.nb+4*nb]=SYS.J_P    
-    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]=P.T
-    LHS[3*SYS.nb:3*SYS.nb+4*nb,3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=phi_p.T
-    LHS[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb,3*SYS.nb:3*SYS.nb+4*SYS.nb]=P
+    LHS[3*SYS.nb:3*SYS.nb+4*SYS.nb,3*SYS.nb:3*SYS.nb+4*SYS.nb]=SYS.J_P    
+    LHS[3*SYS.nb:3*SYS.nb+4*SYS.nb,3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]=SYS.P.T
+    LHS[3*SYS.nb:3*SYS.nb+4*SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=phi_p.T
+    LHS[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb,3*SYS.nb:3*SYS.nb+4*SYS.nb]=SYS.P
     LHS[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,0:3*SYS.nb]=phi_r
     LHS[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,3*SYS.nb:3*SYS.nb+4*SYS.nb]=phi_p       
     
@@ -137,11 +137,15 @@ def compute_accel(SYS):
     SYS.lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
     SYS.lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
     
-    
-    
-    
-    
+#%%
 
+def build_DF(time_list):
+    outputs=pd.DataFrame(time_list,columns=["time"])
+    cols=["r","dr","ddr","p","dp","ddp","lambda_p","lagrange"]
+    for i in cols:
+        outputs[i]=np.zeros(len(time_list))
+        
+    return outputs
 #%%
 def build_p_from_A(A):
     import numpy as np

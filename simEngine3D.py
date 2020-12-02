@@ -13,6 +13,8 @@ from CD import *
 from DP1 import *
 from DP2 import *
 from D import *
+import pandas as pd
+import xarray as xr
 #%%
 
 
@@ -43,6 +45,9 @@ def dynamic_analysis(sys,t_start,t_step,t_end):
     check_phi(SYS.bodies,SYS.constraints,0,tol)    
     check_euler(SYS.bodies,SYS.constraints,0,tol)  
     
+    compute_accel(SYS)
+    
+    outputs=build_DF(time_list) #construct DataFrame of length of time_list and columns defined in function
 
         
                                     
