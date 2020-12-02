@@ -90,15 +90,7 @@ constraints:
 	'f': 0
 	'between': 'body i and body j'	
 	}	
-	{
-	'name': 'driving'
-	'ID': 6
-	'type: 'DP1'
-	'a_bar_i': [1,0,0]
-	'a_bar_j': [0,1,0]
-	'f' : np.sin(np.pi/4*np.cos(2*t))
-	'between': 'body i and body j'	
-	}
+
 
 ]
 

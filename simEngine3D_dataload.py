@@ -12,10 +12,11 @@ class body():
         self.q = np.array([0,0,0,0,0,0,0])
         self.a_bar= np.array([0,0,0],dtype=np.float64)
         self.r_dot= np.array([0,0,0],dtype=np.float64)
+        self.r_ddot= np.zeros([3,1])
         self.s_bar = np.array([0,0,0],dtype=np.float64)
         self.normalized= bool()
         self.p_dot= np.zeros([4,1])
-        self.p_d_dot= np.zeros([4,1])    
+        self.p_ddot= np.zeros([4,1])    
         self.ground=""
 #%%
 def array_dot(V):
