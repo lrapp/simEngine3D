@@ -8,12 +8,23 @@ from DP1 import *
 #%%
 
 def df(t):
-    return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
+#    return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
+    return 0
 
 def ddf(t):
-    return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
-            np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
+#    return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
+#            np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
+    return 0
     
+#%%
+# calculate a_tilde
+def tilde(a):
+    ax, ay, az = float(a[0]), float(a[1]), float(a[2])
+
+    t = np.array([[0, -az, ay],
+                  [az, 0, -ax],
+                  [-ay, ax, 0]])
+    return t
 #%%
 def build_M(SYS):
     M=np.zeros((3*SYS.nb,3*SYS.nb))
@@ -132,15 +143,44 @@ def compute_accel(SYS):
     
     unknowns=np.dot(np.linalg.inv(LHS),RHS)    
     
-#    SYS.ddr=unknowns[0:3*SYS.nb]
-#    SYS.ddp=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]    
-#    SYS.lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
-#    SYS.lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+    ddr=unknowns[0:3*SYS.nb]
+    ddp=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]    
+    lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
+    lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
     
-    SYS.outputs.loc[SYS.n,"ddr0"]=unknowns[0:3*SYS.nb]
-    SYS.outputs.loc[SYS.n,"ddp0"]=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]  
-    SYS.outputs.loc[SYS.n,"lambda_p0"]= unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
-    SYS.outputs.loc[SYS.n,"lagrange0"]=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+    columns_to_update=["ddr0","ddp0","lambda_p0","lagrange0"]    
+    values=[ddr,ddp,lambda_p,lagrange]
+    
+    for i in range(0,len(columns_to_update)):
+        col=columns_to_update[i]
+        val=values[i]
+        s_n=SYS.outputs[col].copy()
+        s_n[SYS.n]=val
+        SYS.outputs[col]=s_n
+    
+    # for i,j in update_dict.items():
+    #     col=i    
+    #     values_slice=j
+    #     s_n=SYS.outputs[col].copy()
+    #     s_n[SYS.n]=unknowns[values_slice]       
+        
+        # SYS.outputs[col]=s_n          
+    
+    # columns_to_update=["ddr0","ddp0","lambda_p0","lagrange0"]
+    # update_values=[slice(0,3*SYS.nb,1),slice(3*SYS.nb,3*SYS.nb+4*SYS.nb,1),slice(3*SYS.nb+4*SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb,1),slice(3*SYS.nb+4*SYS.nb+SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,1)]
+    # for i in range(0,len(columns_to_update)):
+    #     col=columns_to_update[i]
+    #     values_slice=update_values[i]
+    #     s_n=SYS.outputs[col].copy()
+    #     s_n[SYS.n]=unknowns[values_slice]       
+        
+    #     SYS.outputs[col]=s_n        
+        
+
+    # SYS.outputs.loc[SYS.n,"ddr0"]=unknowns[0:3*SYS.nb]
+    # SYS.outputs.loc[SYS.n,"ddp0"]=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]  
+    # SYS.outputs.loc[SYS.n,"lambda_p0"]= unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
+    # SYS.outputs.loc[SYS.n,"lagrange0"]=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
     
 #%%
 
@@ -176,9 +216,15 @@ def update_level0(SYS):
         body=SYS.bodies[int(i[0][-1])]
         for j in i:
             if "r" in j:
-                SYS.outputs.loc[SYS.n,j]=body.q[:3]
+                r0_n=SYS.outputs[j].copy()
+                r0_n[SYS.n]=body.q[:3].copy()
+                SYS.outputs[j]=r0_n
+                # SYS.outputs.loc[SYS.n,j]=body.q[:3]
             else:
-                SYS.outputs.loc[SYS.n,j]=body.q[3:]
+                p0_n=SYS.outputs[j].copy()
+                p0_n[SYS.n]=body.q[3:].copy()
+                SYS.outputs[j]=p0_n                
+                # SYS.outputs.loc[SYS.n,j]=body.q[3:]
 
 #%%
 def update_level1(SYS):
@@ -196,11 +242,20 @@ def update_level1(SYS):
             if "r" in j:
                 r_dot=body.r_dot
                 r_dot.shape=(3,1)
-                SYS.outputs.loc[SYS.n,j]=r_dot
+                
+                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+                s_n[SYS.n]=r_dot      
+                SYS.outputs[j]=s_n
+                
+                # SYS.outputs.loc[SYS.n,j]=r_dot
             else:
                 p_dot=body.p_dot
-                p_dot.shape=(4,1)                
-                SYS.outputs.loc[SYS.n,j]=body.p_dot   
+                p_dot.shape=(4,1)      
+                
+                s_n=SYS.outputs[j].copy()
+                s_n[SYS.n]=p_dot      
+                SYS.outputs[j]=s_n
+                # SYS.outputs.loc[SYS.n,j]=body.p_dot   
                 
 #%%
 def update_level2(SYS):
@@ -216,13 +271,20 @@ def update_level2(SYS):
         body=SYS.bodies[int(i[0][-1])]
         for j in i:
             if "r" in j:
-                r_ddot=body.r_ddot
+                r_ddot=body.r_ddot.copy()
                 r_ddot.shape=(3,1)
-                SYS.outputs.loc[SYS.n,j]=r_ddot
+                
+                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+                s_n[SYS.n]=r_ddot      
+                SYS.outputs[j]=s_n
+
             else:
-                p_ddot=body.p_ddot
-                p_ddot.shape=(4,1)                
-                SYS.outputs.loc[SYS.n,j]=body.p_ddot   
+                p_ddot=body.p_ddot.copy()
+                p_ddot.shape=(4,1)          
+                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+                s_n[SYS.n]=p_ddot    
+                SYS.outputs[j]=s_n
+                
                              
 #%%
 def BDF(SYS,n):
@@ -240,8 +302,10 @@ def BDF(SYS,n):
         sol_1=SYS.outputs.iloc[n-1]        
 
         C_r_dot = -alpha1*np.array(sol_1.dr0)
+        C_r_dot.shape=(3,1)
         C_r = -alpha1*np.array(sol_1.r0) + beta_0*h*C_r_dot
         C_p_dot = -alpha1*np.array(sol_1.dp0)
+        C_p_dot.shape=(4,1)
         C_p = -alpha1*np.array(sol_1.p0) + beta_0*h*C_p_dot
     else: #use BDF order 2
         beta_0 = 2/3
@@ -249,11 +313,14 @@ def BDF(SYS,n):
         alpha2 = 1/3
     
         sol_1=SYS.outputs.iloc[n-1]               
-        sol_2=SYS.outputs.iloc[n-2]               
+        sol_2=SYS.outputs.iloc[n-2]     
         
+        sol_2.dp0.shape=(4,1)
+                  
         C_r_dot = -alpha1*np.array(sol_1.dr0) - alpha2*np.array(sol_2.dr0)
         C_r=-alpha1*np.array(sol_1.r0) - alpha2*np.array(sol_2.r0) + beta_0*h*C_r_dot
         C_p_dot=-alpha1*np.array(sol_1.dp0) - alpha2*np.array(sol_2.dp0)
+        C_p_dot.shape=(4,1)        
         C_p = -alpha1*np.array(sol_1.p0) - alpha2*np.array(sol_2.p0) + beta_0*h*C_p_dot 
     
     
@@ -262,6 +329,9 @@ def BDF(SYS,n):
     ddp=np.array(sol_1.ddp0)
     lambda_p=np.array(sol_1.lambda_p0)
     lagrange=np.array(sol_1.lagrange0)
+    
+    ddr.shape=(3,1)
+    ddp.shape=(4,1)
     
     count=0
     error=1
@@ -322,9 +392,7 @@ def BDF(SYS,n):
         ddp=ddp+delta_z[3*SYS.nb:3*SYS.nb+4*SYS.nb]
         lambda_p=lambda_p+delta_z[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
         lagrange=lagrange+delta_z[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
-        
-        ddr.shape=(1,3)
-        ddp.shape=(1,4)
+
         
                                   
         error=np.linalg.norm(delta_z)                      

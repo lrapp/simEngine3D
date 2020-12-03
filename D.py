@@ -1,7 +1,9 @@
 import numpy as np
+#%%
 # calculate a_tilde
 def tilde(a):
-    ax, ay, az = a[0], a[1], a[2]
+    ax, ay, az = float(a[0]), float(a[1]), float(a[2])
+
     t = np.array([[0, -az, ay],
                   [az, 0, -ax],
                   [-ay, ax, 0]])

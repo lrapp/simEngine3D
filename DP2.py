@@ -1,4 +1,5 @@
 import numpy as np
+from simEngine3D_functions import tilde
 
 #%%
 def build_A(p):

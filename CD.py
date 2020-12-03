@@ -6,15 +6,17 @@ Created on Fri Oct 30 11:04:04 2020
 """
 import numpy as np
 
+
 # calculate a_tilde
 def tilde(a):
-    ax, ay, az = a[0], a[1], a[2]
+    ax, ay, az = float(a[0]), float(a[1]), float(a[2])
+
     t = np.array([[0, -az, ay],
                   [az, 0, -ax],
                   [-ay, ax, 0]])
     return t
 
-#%%
+ #%%
 def build_A(p):
         import numpy as np
         A=np.empty([3,3])

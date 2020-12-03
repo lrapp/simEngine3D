@@ -8,7 +8,7 @@ import numpy as np
 
 t_start=0
 t_end=10
-t_step=0.1
+t_step=0.01
 
 tic=ttime.perf_counter()
 SYS=dynamic_analysis(t_start,t_step,t_end)

@@ -15,6 +15,7 @@ from DP2 import *
 from D import *
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 #%%
 
 
@@ -25,12 +26,8 @@ class sys():
         self.bodies=[] #list of bodie objects
         self.constraints=[] #list of constraints
     
-
-t_start=0
-t_end=25
-t_step=0.01
-
-def dynamic_analysis(sys,t_start,t_step,t_end):
+    
+def dynamic_analysis(t_start,t_step,t_end):
     SYS=sys()
     SYS.h=t_step
     time_list=np.arange(t_start,t_end,t_step)
@@ -61,15 +58,4 @@ def dynamic_analysis(sys,t_start,t_step,t_end):
         SYS.n=i
         BDF(SYS,SYS.n)
 
-    #%%
-        
-    position=SYS.outputs["r0"]
-    x=[]
-    y=[]
-    z=[]
-    for i in position:
-        x.append(i[0])
-        y.append(i[1])
-        z.append(i[2])
-        
-                                    
+    return SYS
