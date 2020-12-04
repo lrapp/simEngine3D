@@ -392,6 +392,7 @@ def BDF(SYS,n):
         ddp=ddp+delta_z[3*SYS.nb:3*SYS.nb+4*SYS.nb]
         lambda_p=lambda_p+delta_z[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
         lagrange=lagrange+delta_z[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+        
 
         
                                   
