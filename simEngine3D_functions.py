@@ -7,14 +7,14 @@ from CD import *
 from DP1 import *
 #%%
 
-def df(t):
-#    return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
-    return 0
+# def df(t):
+#     return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
+#     # return 0
 
-def ddf(t):
-#    return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
-#            np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
-    return 0
+# def ddf(t):
+#     return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
+#             np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
+#     # return 0
     
 #%%
 # calculate a_tilde
@@ -54,7 +54,7 @@ def build_P(SYS):
 def build_F(SYS):
     F=np.zeros([3*SYS.nb])
     for i in range(0,SYS.nb):
-        F[0+3*i:3+3*i]=SYS.bodies[i].gravity
+        F[0+3*i:3+3*i]=SYS.bodies[i].gravity*SYS.bodies[i].mass
            
     F.shape=(3,1)
     return F
@@ -79,7 +79,7 @@ def build_gamma_p(SYS):
 def J_bar_bar(X):
     m=X.mass
     J_bar=np.zeros((3,3))
-    L=X.dimensions[0]    
+    L=X.dimensions[0]*2    
     b=X.dimensions[1]/2
     c=X.dimensions[2]/2
     
@@ -110,7 +110,8 @@ def compute_accel(SYS):
     SYS.F=build_F(SYS)
     SYS.tau_hat=build_tau_hat(SYS)
     SYS.gamma_p=build_gamma_p(SYS)
-    SYS.gamma=calc_gamma(SYS.bodies,SYS.constraints,ddf(0))
+    # SYS.gamma=calc_gamma(SYS.bodies,SYS.constraints,SYS.ddf)
+    SYS.gamma=calc_gamma(SYS)    
     
     SYS.gamma_hat=SYS.gamma[0:SYS.nc] #remove euler constraint here
     SYS.gamma_hat.shape=(SYS.nc,1)
@@ -669,13 +670,17 @@ def calc_partials_HW82(X,cl):
 
 #%%
 
-def calc_nue(X,cl,t):
+def calc_nue(SYS):
+    X=SYS.bodies
+    cl=SYS.constraints
+    t=SYS.time
+    
     nue_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                nue_values.append(CD_nue(X,i,df(t)))
+                nue_values.append(CD_nue(X,i,SYS.df(t)))
             if i.type.strip(" ' ") == 'DP1':
-                nue_values.append(DP1_nue(X,i,df(t)))            
+                nue_values.append(DP1_nue(X,i,SYS.df(t)))            
 
     nu_p=[]            
     body_count=0
@@ -695,13 +700,17 @@ def calc_nue(X,cl,t):
 
 #%%
 
-def calc_gamma(X,cl,t):
+def calc_gamma(SYS):
+    X=SYS.bodies
+    cl=SYS.constraints
+    t=SYS.time
+    
     gamma_values=[]
     for i in cl:
             if i.type.strip(" ' ") == 'CD':
-                gamma_values.append(gamma_CD(X,i,ddf(t)))
+                gamma_values.append(gamma_CD(X,i,SYS.ddf(t)))
             if i.type.strip(" ' ") == 'DP1':
-                gamma_values.append(gamma_DP1(X,i,ddf(t)))
+                gamma_values.append(gamma_DP1(X,i,SYS.ddf(t)))
                 
     gamma_p=[]            
     body_count=0

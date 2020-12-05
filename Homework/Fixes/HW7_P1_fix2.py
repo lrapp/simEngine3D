@@ -14,7 +14,7 @@ import time
 import numpy as np
 
 
-file="C:\\Users\\Logan\\Desktop\\simEngine3D\\revJoint_fix2.txt"
+file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"
 #%%
 def main(file):
     t = 0.
@@ -121,3 +121,5 @@ def main(file):
 t0=time.time()
 torqe=main(file)
 t1=time.time()
+
+time_list=np.arange(0,10,1e-3)
