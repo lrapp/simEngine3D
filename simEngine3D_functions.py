@@ -621,51 +621,51 @@ def calc_partials(X,cl):
 
 #%%
 
-def calc_partials_HW82(X,cl):
-    phi_partials_values=np.zeros([len(cl),7*len(X)])
-    counter=0
-    for i in cl:
-            if i.type.strip(" ' ") == 'CD':
-                dri,dpi,drj,dpj=CD_PHI_partials(X,i)
-                if i.body_i_name == "body i":
-                    phi_partials_values[counter,0:3]=dri
-                    phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
+# def calc_partials_HW82(X,cl):
+#     phi_partials_values=np.zeros([len(cl),7*len(X)])
+#     counter=0
+#     for i in cl:
+#             if i.type.strip(" ' ") == 'CD':
+#                 dri,dpi,drj,dpj=CD_PHI_partials(X,i)
+#                 if i.body_i_name == "body i":
+#                     phi_partials_values[counter,0:3]=dri
+#                     phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
                                        
-                if i.body_i_name == "body j":
-                    phi_partials_values[counter,3:6]=dri          
-                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
+#                 if i.body_i_name == "body j":
+#                     phi_partials_values[counter,3:6]=dri          
+#                     phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
                                         
-                if i.body_j_name == "body j":
-                    phi_partials_values[counter,3:6]=drj          
-                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
+#                 if i.body_j_name == "body j":
+#                     phi_partials_values[counter,3:6]=drj          
+#                     phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
                                         
-                if i.body_j_name == "body k":
-                    phi_partials_values[counter,6:9]=drj          
-                    phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                  
+#                 if i.body_j_name == "body k":
+#                     phi_partials_values[counter,6:9]=drj          
+#                     phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                  
 
-            if i.type.strip(" ' ") == 'DP1':
+#             if i.type.strip(" ' ") == 'DP1':
                 
-                dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
+#                 dri,dpi,drj,dpj=DP1_PHI_partials(X,i)
 
-                if i.body_i_name == "body i":
-                    phi_partials_values[counter,0:3]=dri
-                    phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
+#                 if i.body_i_name == "body i":
+#                     phi_partials_values[counter,0:3]=dri
+#                     phi_partials_values[counter,3*len(X):3*len(X)+4]=dpi                          
                                        
-                if i.body_i_name == "body j":
-                    phi_partials_values[counter,3:6]=dri          
-                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
+#                 if i.body_i_name == "body j":
+#                     phi_partials_values[counter,3:6]=dri          
+#                     phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpi
                                         
-                if i.body_j_name == "body j":
-                    phi_partials_values[counter,3:6]=drj          
-                    phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
+#                 if i.body_j_name == "body j":
+#                     phi_partials_values[counter,3:6]=drj          
+#                     phi_partials_values[counter,3*len(X)+4:3*len(X)+8]=dpj       
                                         
-                if i.body_j_name == "body k":
-                    phi_partials_values[counter,6:9]=drj          
-                    phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                                                    
+#                 if i.body_j_name == "body k":
+#                     phi_partials_values[counter,6:9]=drj          
+#                     phi_partials_values[counter,3*len(X)+8:3*len(X)+12]=dpj                                                    
         
-            counter=counter+1
+#             counter=counter+1
                 
-    return phi_partials_values
+#     return phi_partials_values
 
 #%%
 

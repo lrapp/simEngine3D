@@ -99,11 +99,11 @@ def inverse_dynamics_analysis(SYS,t_start,t_step,t_end,file):
          t=step*SYS.h
          # position analysis using Newton-Raphson
          diff = float("inf")
-         n = 0
-         SYS.n=n
+         count = 0
+         SYS.n=step
          SYS.time=t
      
-         while diff > tol and n < max_iter:
+         while diff > tol and count < max_iter:
              q_new = q_old - np.matmul(np.linalg.inv(phi_q), phi)
              diff  = np.linalg.norm(q_new - q_old)
              q_old = q_new
@@ -116,7 +116,7 @@ def inverse_dynamics_analysis(SYS,t_start,t_step,t_end,file):
              phi = calc_phi(SYS.bodies,SYS.constraints,t)
              phi_q = calc_partials(SYS.bodies,SYS.constraints)
      
-             n += 1    
+             count += 1    
           
              
          r=to_X[:3]
