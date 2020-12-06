@@ -1,11 +1,3 @@
-#Enter flags you want: i, ii, iii, iv - case senstive, must be seperated by comma
-flags:
-[
-	{
-	i,ii,iii,iv
-	}
-]
-	
 #Enter body information
 can enter either normalized or not normalized p values, if not normalized you must mark the 'Need normalized' flag 'True'
 must enter normalized p_dot values

@@ -19,14 +19,20 @@ import numpy as np
 #%%
 
 
-
+#custom class definition to hold all components of a simulation
 class sys():
     def __init__(self):    
         self.nb=0 #number of bodies
-        self.bodies=[] #list of bodie objects
+        self.bodies=[] #list of body objects
         self.constraints=[] #list of constraints
-    
-    
+        self.time=0 #current timestep
+        self.h = 0 #time_step
+        self.nc=0 #number of constraints
+        self.outputs = np.nan #holds results information
+        self.n = 0 #index
+        
+
+#%%  
 def dynamic_analysis(SYS,t_start,t_step,t_end,file):
 
     SYS.h=t_step

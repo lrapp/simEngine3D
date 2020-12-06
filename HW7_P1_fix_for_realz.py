@@ -7,7 +7,7 @@ import numpy as np
 
 
 t_start=0
-t_end=10
+t_end=5
 t_step=0.001
 
 file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"

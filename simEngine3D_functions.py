@@ -1,6 +1,5 @@
 import numpy as np
-from constraint_value_functions import phi_dp1,phi_dp2,phi_cd,phi_d
-from simEngine3D_dataload import data_file,DP2_PHI_partials,D_PHI_partials, body
+from simEngine3D_dataload import data_file,body
 import pandas as pd
 
 from CD import *

@@ -10,6 +10,7 @@ class body():
         self.ID = ""    
         self.mass = np.float()
         self.q = np.array([0,0,0,0,0,0,0])
+        self.dimensions= np.array([0,0,0],dtype=np.float64)        
         self.a_bar= np.array([0,0,0],dtype=np.float64)
         self.r_dot= np.array([0,0,0],dtype=np.float64)
         self.r_ddot= np.zeros([3,1])
@@ -18,16 +19,8 @@ class body():
         self.p_dot= np.zeros([4,1])
         self.p_ddot= np.zeros([4,1])    
         self.ground=""
-#%%
-def array_dot(V):
-    for i in range(0,len(V)-1):
-        if len(V) >= 2:
-            x=np.dot(V[0],V[1])
-            V.pop(0)
-            if len(V) >1:
-                V.pop(0)
-                V.insert(0,x)
-    
+        self.type=""
+
 #%%import data from input file
 def data_file(file):
 
@@ -39,7 +32,6 @@ def data_file(file):
         contents=f.readlines()
         
     #%Create empty lists
-    
     bodys=[]
     body_list=[]
     body_ob_list=[]
@@ -160,33 +152,9 @@ def data_file(file):
     for i in body_ob_list:
         if i.normalized == 'True':
             i.q[3:]=i.q[3:] / np.linalg.norm(i.q[3:])
-            
-        
-    #Assemble rotation matrix A using the values e0-e3 provided
-#    A_list=[]
-#    for i in range(0,len(body_ob_list)):
-#        A=np.empty([3,3])
-#
-#        for k in range(0,len(A)):
-#            A[k,k]=2*((body_ob_list[i].q[3]**2)+(body_ob_list[i].q[4+k]**2)-0.5)
-#        A[0,1]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[5]-body_ob_list[i].q[3]*body_ob_list[i].q[6])
-#        A[0,2]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[5])
-#        
-#        A[1,0]=2*((body_ob_list[i].q[4]*body_ob_list[i].q[5]+body_ob_list[i].q[3]*body_ob_list[i].q[6]))
-#        A[1,2]=2*(body_ob_list[i].q[5]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[4])
-#        
-#        A[2,0]=2*(body_ob_list[i].q[4]*body_ob_list[i].q[6]-body_ob_list[i].q[3]*body_ob_list[i].q[5])
-#        A[2,1]=2*((body_ob_list[i].q[5]*body_ob_list[i].q[6]+body_ob_list[i].q[3]*body_ob_list[i].q[4]))
-#    
-#        A_list.append(A)
-#    
-#    for i in range(0,len(A_list)):
-#        body_ob_list[i].A_rotation=A_list[i]
-        
-
-            
+                  
     
-    return body_ob_list #returns list of bodies with corisponding information
+    return body_ob_list #returns list of bodies
 #%%
 class constraint():
     """Object that holds information about bodies"""
@@ -208,8 +176,8 @@ def constraints_in(file):
     with open(file,'r') as f:
         contents=f.readlines()
         
-    constraints_index=contents.index('constraints:\n') #Know where to start reading in body information
-    end_index=contents.index(']\n',constraints_index) #Know where to start reading in body information
+    constraints_index=contents.index('constraints:\n') #Know where to start reading in constraint information
+    end_index=contents.index(']\n',constraints_index) #Know where to stop reading in constraint information
     
     constraints=[]    
     start_count_index=0
@@ -220,7 +188,7 @@ def constraints_in(file):
         constraints.append(contents[i].strip())    
         
         
-    count=constraints.count("{") #Count how many left squigly brakets there are, this gives how many bodies there are in the system    
+    count=constraints.count("{") #Count how many left squigly brakets there are, this gives how many constraints there are in the system    
 
     constraint_list=[]
     for i in range(0,count):
@@ -228,8 +196,8 @@ def constraints_in(file):
         
     C=[]
     for k in range(0,count):
-        st=constraints.index("{",start_count_index) #Get first body information
-        en=constraints.index("}",end_count_index) #Stop body information once "}" is found
+        st=constraints.index("{",start_count_index) #Get first constraint information
+        en=constraints.index("}",end_count_index) #Stop constraint information once "}" is found
 
         y=[]
         x=[]
@@ -312,357 +280,3 @@ def constraints_in(file):
           
           
     return constraint_list
-
-
-
-#%%
-def build_B(p_vector,a_vector):
-    e0=p_vector[0]
-    e=p_vector[1:]
-    a_bar=a_vector
-    I3=np.identity(3)
-    
-    a_bar_T=np.transpose(a_bar)
-    a_bar_tilde=tilde(a_bar)
-    e_tilde=tilde(e)
-    
-    B=np.zeros([3,4])
-    X=(2*(np.dot(np.dot(float(e0),I3)+e_tilde,a_bar)))
-       
-    Y=(2*(np.dot(e,a_bar_T)-np.dot(np.dot(float(e0),I3)+e_tilde,a_bar_tilde)))
-    for i in range(0,len(X)):
-        B[i,0]=X[i]
-    B[0,1:]=Y[0]
-    B[1,1:]=Y[1]
-    B[2,1:]=Y[2]
-
-    return B
-
-    
-#%%
-def tilde(a_vector):
-    t=np.zeros([3,3],dtype=float)
-    t[0,1]=-a_vector[2]
-    t[0,2]=a_vector[1]
-    t[1,0]=a_vector[2]
-    t[1,2]=-a_vector[0]
-    t[2,0]=-a_vector[1]
-    t[2,1]=a_vector[0]
-    return t
-    
-#%%
-def DP1_PI(X,C):
-    for i in X:
-        if i.name == "body i":
-            i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i) 
-            
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-    a_j=np.dot(J.A_rotation,a_bar_j)
-    a_i=np.dot(I.A_rotation,a_bar_i)
-    a_i_T=np.transpose(a_i)
-
-    a_bar_tilde_j=tilde(a_bar_j)
-    a_j_T=np.transpose(a_j)    
-    
-    PI_j=-np.dot(np.dot(np.dot(a_i_T,A_i.T),A_j),a_bar_tilde_j)
-    
-    return PI_j
-
-#%%
-def DP1_PHI_partials(X,C):
-    body_1=C.body_i_name
-    body_2=C.body_j_name
-    
-    for i in X:
-        if i.name == body_1:
-            i_index=X.index(i)
-        if i.name == body_2:
-            j_index=X.index(i) 
-               
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-    a_j=np.dot(J.A_rotation,a_bar_j)
-    a_i=np.dot(I.A_rotation,a_bar_i)
-    a_i_T=np.transpose(a_i)
-
-
-    a_j_T=np.transpose(a_j)
-    
-    
-    B_i=build_B(p_i,a_bar_i)
-    B_j=build_B(p_j,a_bar_j)
-    PHI_DP1_p_i=np.dot(a_j_T,B_i)
-    PHI_DP1_p_j=np.dot(a_i_T,B_j)   
-    
-    PHI_DP1_r_i=np.array([0,0,0])
-    PHI_DP1_r_j=np.array([0,0,0])
-    
-    return PHI_DP1_r_i,PHI_DP1_p_i,PHI_DP1_r_j,PHI_DP1_p_j
-#%%
-def CD_PI(X,C):
-        #Set bodys i and j 
-    body_1=C.body_i_name
-    body_2=C.body_j_name
-    
-    for i in X:
-        if i.name == body_1:
-            i_index=X.index(i)
-        if i.name == body_2:
-            j_index=X.index(i) 
-               
-            
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-    
-    
-    #define G and p_dot
-
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-    
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    
-    s_bar_i=C.s_bar_i
-    s_bar_j=C.s_bar_j
-    
-    a_j=np.dot(A_j,a_bar_j)
-    a_i=np.dot(A_i,a_bar_i)
-    a_i_T=np.transpose(a_i)
-    
-    c=C.c
-    c_T=np.transpose(c)
-    s_bar_j_tilde=tilde(s_bar_j)
-    
-    PI_j=-np.dot(np.dot(c_T,A_j),s_bar_j_tilde)
-    
-    return PI_j
-
-#%%
-def CD_PHI_partials(X,C):
-        #Set bodys i and j 
-    body_1=C.body_i_name
-    body_2=C.body_j_name
-    
-    for i in X:
-        if i.name == body_1:
-            i_index=X.index(i)
-        if i.name == body_2:
-            j_index=X.index(i) 
-                           
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=C.a_bar_i
-    a_bar_j=C.a_bar_j
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-    
-    
-    #define G and p_dot
-
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-    
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    
-    s_bar_i=C.s_bar_i
-    s_bar_j=C.s_bar_j
-    
-    a_j=np.dot(A_j,a_bar_j)
-    a_i=np.dot(A_i,a_bar_i)
-    a_i_T=np.transpose(a_i)
-
-
-    a_bar_tilde_i=tilde(a_bar_i)
-
-    a_bar_tilde_j=tilde(a_bar_j)
-    a_bar_tilde_j_T=np.transpose(a_bar_tilde_j)
-    
-    B_i=build_B(p_i,s_bar_i)
-    B_j=build_B(p_j,s_bar_j)
-    
-    c=C.c
-    c_T=np.transpose(c)
-    
-    first=-c_T
-    second=np.dot(-c_T,B_i)
-    third=c_T
-    fourth=np.dot(c_T,B_j)
-    
-    
-    return first[0], second[0], third[0], fourth[0]
-#%%
-#TO DO: read in a_bar_j and a_bar_i from constraints, not from bodies
-def DP2_PHI_partials(X):
-      #Set bodys i and j 
-    for i in X:
-        if i.name == "body i":
-            i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i) 
-            
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=I.a_bar
-    a_bar_j=J.a_bar
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-    s_bar_j=J.s_bar
-    s_bar_i=I.s_bar
-    
-    r_i=I.q[:3]
-    r_j=J.q[:3]
-    
-    a_j=np.dot(J.A_rotation,a_bar_j)
-    a_i=np.dot(I.A_rotation,a_bar_i)
-    a_i_T=np.transpose(a_i)
-
-
-    a_bar_tilde_i=tilde(a_bar_i)
-
-    a_bar_tilde_j=tilde(a_bar_j)
-    a_j_T=np.transpose(a_j)
-    
-    
-    B_i=build_B(p_i,a_bar_i)
-    B_j=build_B(p_j,s_bar_j)
-
-    
-    d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
-    d_ij_T=np.transpose(d_ij)    
-    
-    PHI_DP1_p_i=np.dot(d_ij_T,B_i)
-    PHI_DP1_p_j=np.dot(a_i_T,B_j)   
-    
-    PHI_DP1_r_i=-a_i_T
-    PHI_DP1_r_j=a_i_T    
-    
-    return PHI_DP1_r_i[0], PHI_DP1_r_j[0],PHI_DP1_p_i[0],PHI_DP1_p_j[0]
-
-#%%
-#TO DO: read in a_bar_j and a_bar_i from constraints, not from bodies
-
-def D_PHI_partials(X):
-      #Set bodys i and j 
-    for i in X:
-        if i.name == "body i":
-            i_index=X.index(i)
-        if i.name == "body j":
-            j_index=X.index(i) 
-            
-    I=X[i_index]
-    J=X[j_index]  
-    #Set a and A for bodies i and j
-    a_bar_i=I.a_bar
-    a_bar_j=J.a_bar
-    A_i=I.A_rotation
-    A_j=J.A_rotation
-    
-    #Performe some transposes 
-    a_bar_i_T=np.transpose(a_bar_i)
-    a_bar_j_T=np.transpose(a_bar_j)
-    A_i_T=np.transpose(A_i)
-    A_j_T=np.transpose(A_j)
-
-    p_i=I.q[3:]
-    p_j=J.q[3:]
-    p_dot_i=I.p_dot
-    p_dot_j=J.p_dot
-
-    s_bar_j=J.s_bar
-    s_bar_i=I.s_bar
-    
-    r_i=I.q[:3]
-    r_j=J.q[:3]
-    
-    a_j=np.dot(J.A_rotation,J.a_bar)
-    a_i=np.dot(I.A_rotation,I.a_bar)
-    a_i_T=np.transpose(a_i)
-
-
-    a_bar_tilde_i=tilde(a_bar_i)
-    a_bar_tilde_j=tilde(a_bar_j)
-    a_j_T=np.transpose(a_j)
-    
-
-    B_p_i__s_bar_i=build_B(p_i,s_bar_i)
-    B_p_j__s_bar_j=build_B(p_j,s_bar_j)
-    
-    d_ij=(r_j+np.dot(A_j,s_bar_j)-r_i-np.dot(A_i,s_bar_i))
-    d_ij_T=np.transpose(d_ij)    
-    
-    PHI_DP1_p_i=-2*np.dot(d_ij_T,B_p_i__s_bar_i)
-    PHI_DP1_p_j=2*np.dot(d_ij_T,B_p_j__s_bar_j)
-    PHI_DP1_r_i=-2*d_ij_T
-    PHI_DP1_r_j=2*d_ij_T    
-    
-    return PHI_DP1_r_i[0], PHI_DP1_r_j[0],PHI_DP1_p_i[0],PHI_DP1_p_j[0]
