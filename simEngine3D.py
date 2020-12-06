@@ -6,7 +6,8 @@ Restarting with pieces of my SimEngine3D from homework.  Starting over here for 
 @author: Logan
 """
 import os
-os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")
+# os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")
+os.chdir(os.getcwd())
 from simEngine3D_dataload import data_file, constraints_in
 from simEngine3D_functions import *
 from CD import *

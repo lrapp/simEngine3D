@@ -2,7 +2,7 @@ from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os 
 
 
 
@@ -10,7 +10,12 @@ t_start=0
 t_end=5
 t_step=0.01
 
-file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
+
+file_dir=os.getcwd()
+file_name="\\HW8_P1_revJoint.txt"
+file=file_dir+file_name
+
+# file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
 SYS=sys()
 
 #%% set derivites of driving function specific to this problem

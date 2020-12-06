@@ -2,7 +2,7 @@ from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os 
 
 
 
@@ -10,7 +10,11 @@ t_start=0
 t_end=5
 t_step=0.001
 
-file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"
+file_dir=os.getcwd()
+file_name="\\Homework\\Fixes\\revJoint_fix2.txt"
+file=file_dir+file_name
+
+# file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"
 
 #create system object
 SYS=sys()
