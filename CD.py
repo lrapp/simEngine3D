@@ -79,14 +79,27 @@ def build_B(p_vector,a_vector):
 
 #%%
 def CD_PHI_r(X,C):
+        #Set bodys i and j 
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+                           
+    I=X[i_index]
+    J=X[j_index]  
+    
     res = np.zeros(6)
     c=C.c
     c_T=np.transpose(c)
-    j_ground=X[1].ground
+    j_ground=J.ground
     
     res[:3]=-c_T
     res[3:]=c_T
-    if j_ground:
+    if j_ground=='True':
         return res[:3]
     else:
         return res
@@ -100,9 +113,9 @@ def CD_PHI_p(X,C):
     s_bar_i=C.s_bar_i
     p=X[0].q[3:]
 
-    res[:3]=-np.dot(c,build_B(X[0].q[3:],s_bar_i))
-    res[3:]=c_T
-    if j_ground:
+    res[:4]=-np.dot(c,build_B(X[0].q[3:],s_bar_i))
+    res[4:]=c.T
+    if j_ground=='True':
         return res[:3]
     else:
         return res    
@@ -151,15 +164,104 @@ def CD_PHI_partials(X,C):
         r_v = np.concatenate((first[0],second[0]))
         mult=1
     else:
-        r_v= np.concatenate((first[0], third[0], second[0], fourth[0]))
-        # r_v= np.concatenate((first[0], second[0], third[0], fourth[0]))
+        # r_v= np.concatenate((first[0], third[0], second[0], fourth[0]))
+        r_v= np.concatenate((first[0], second[0], third[0], fourth[0]))
         mult=2
         
     r_v.shape=(1,7*mult)
     return r_v
-    
 #%%
+def CD_PHI_partials_r(X,C):
+        #Set bodys i and j 
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+                           
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    
+    A_i=build_A(I.q[3:])
+    A_j=build_A(J.q[3:])
+    
 
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    
+    s_bar_i=C.s_bar_i
+    s_bar_j=C.s_bar_j
+    
+
+    
+    p_i.shape=(4,1)
+    s_bar_i.shape=(3,1)
+    
+    c=C.c
+    c_T=np.transpose(c)
+    
+    r_i=-c_T[0]
+    p_i=np.dot(-c_T,build_B(p_i,s_bar_i))
+    
+    r_j=c_T[0]
+    p_j=np.dot(c_T,build_B(p_j,s_bar_j))
+    if J.ground=='True':
+        return r_i
+    else:
+        return np.concatenate((r_i,r_j))
+#%%
+def CD_PHI_partials_p(X,C):
+        #Set bodys i and j 
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+                           
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    
+    A_i=build_A(I.q[3:])
+    A_j=build_A(J.q[3:])
+    
+
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    
+    s_bar_i=C.s_bar_i
+    s_bar_j=C.s_bar_j
+    
+
+    
+    p_i.shape=(4,1)
+    s_bar_i.shape=(3,1)
+    
+    c=C.c
+    c_T=np.transpose(c)
+    
+    r_i=-c_T[0]
+    p_i=np.dot(-c_T,build_B(p_i,s_bar_i))
+    
+    r_j=c_T[0]
+    p_j=np.dot(c_T,build_B(p_j,s_bar_j))
+    
+    if J.ground=='True':
+        return p_i
+    else:
+        return np.concatenate((p_i,p_j),axis=1)
+#%%
 def CD_phi(X,C,ft):
     body_1=C.body_i_name
     body_2=C.body_j_name

@@ -106,26 +106,8 @@ constraints:
 
 	body2:
 	{
-	'name': 'x prime and z DP1'
-	'ID': 6
-	'type': 'DP1'
-	'a_bar_i': [0,0,1]
-	'a_bar_j': [1,0,0]
-	'f': 0
-	'between': 'body i and body j'
-	}
-	{
-	'name': 'y prime and z DP1'
-	'ID': 7
-	'type': 'DP1'
-	'a_bar_i': [0,0,1]
-	'a_bar_j': [0,1,0]
-	'f': 0
-	'between': 'body i and body j'	
-	}
-	{
 	'name': 'X CD'
-	'ID': 8
+	'ID': 6
 	'type': 'CD'
 	's_bar_i': [2,0,0]
 	's_bar_j': [-1,0,0]
@@ -135,7 +117,7 @@ constraints:
 	}
 	{
 	'name': 'Y CD'
-	'ID': 9
+	'ID': 7
 	'type': 'CD'
 	's_bar_i': [2,0,0]
 	's_bar_j': [-1,0,0]
@@ -145,7 +127,7 @@ constraints:
 	}
 	{
 	'name': 'Z CD'
-	'ID': 10
+	'ID': 8
 	'type': 'CD'
 	's_bar_i': [2,0,0]
 	's_bar_j': [-1,0,0]
@@ -153,6 +135,25 @@ constraints:
 	'f': 0
 	'between': 'body i and body j'	
 	}	
+	{
+	'name': 'x prime and z DP1'
+	'ID': 9
+	'type': 'DP1'
+	'a_bar_i': [0,0,1]
+	'a_bar_j': [1,0,0]
+	'f': 0
+	'between': 'body i and body j'
+	}
+	{
+	'name': 'y prime and z DP1'
+	'ID': 10
+	'type': 'DP1'
+	'a_bar_i': [0,0,1]
+	'a_bar_j': [0,1,0]
+	'f': 0
+	'between': 'body i and body j'	
+	}
+
 ]
 
 

@@ -7,8 +7,8 @@ import os
 
 
 t_start=0
-t_end=5
-t_step=0.01
+t_end=10
+t_step=0.001
 
 
 file_dir=os.getcwd()
@@ -37,16 +37,59 @@ print("time elapsed=",elapsed_time)
 
 #%%
 
-position=SYS.outputs["r0"]
+# output_file=os.getcwd()+"\\out.csv"
+# SYS.outputs.to_csv(output_file)
+#%%
+
+position=SYS.outputs["r"]
 x=[]
 y=[]
 z=[]
+x1=[]
+y1=[]
+z1=[]
 for i in position:
     x.append(i[0])
     y.append(i[1])
     z.append(i[2])
+    x1.append(i[3])
+    y1.append(i[4])
+    z1.append(i[5])    
     
     
     
 time_list=np.arange(t_start,t_end,t_step)
-plt.plot(time_list,y)
+plt.plot(time_list,z1)
+
+
+
+t=time_list[0::30]
+yyy=y[0::30]
+zzz=z[0::30]
+
+y2=y1[0::30]
+z2=z1[0::30]
+
+plt.figure()
+dist=[]
+for i in range(0,len(t)):
+    plt.xlim(-6,6)
+    plt.ylim(-6,6)
+    yy=[0,yyy[i]*2]
+    zz=[0,zzz[i]*2]
+    
+    yy2=[yyy[i]*2,y2[i]]
+    zz2=[zzz[i]*2,z2[i]]
+    
+    line_1=plt.plot(yy,zz,c='b')
+    line_2=plt.plot(yy2,zz2,c='r')
+    # dist.append(np.sqrt((yy[1]-yy2[1])**2+(zz[1]-zz2[1])**2))
+    scat_1=plt.plot(yyy[i],zzz[i],'o',c='b')
+    scat_2=plt.plot(y2[i],z2[i],'o',c='r')    
+    plt.pause(0.1)
+    line=line_1.pop()
+    line.remove()
+    line=line_2.pop()
+    line.remove()
+    
+    

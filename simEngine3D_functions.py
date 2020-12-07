@@ -509,12 +509,14 @@ def BDF(SYS,n):
 
         
                 
-        SYS.phi_q=calc_partials(SYS.bodies,SYS.constraints)    
-        phi_r=SYS.phi_q[:,0:3*SYS.nb]
-        phi_p=SYS.phi_q[:,SYS.nb*3:]
+        # SYS.phi_q=calc_partials(SYS.bodies,SYS.constraints)    
+        # phi_r=SYS.phi_q[:,0:3*SYS.nb]
+        # phi_p=SYS.phi_q[:,SYS.nb*3:]
         
-        phi_r=phi_r[0:SYS.nc] #don't consider euler constraint
-        phi_p=phi_p[0:SYS.nc]    
+        # phi_r=phi_r[0:SYS.nc] #don't consider euler constraint
+        # phi_p=phi_p[0:SYS.nc]    
+        
+        phi_r,phi_p = calc_partials_new(SYS)
         
         PHI=calc_phi(SYS.bodies,SYS.constraints,time)
         PHI=np.array(PHI[0:SYS.nc]) #remove euler parameterization constraint        
@@ -776,9 +778,9 @@ def calc_partials(X,cl):
         if k.ground=='False':
             body_count=body_count+1
         
-    phi_q=np.zeros([len(cl)+body_count,7*body_count])      
-    
-    for i in range(0,len(phi_partials_values)):
+    phi_q=np.zeros([len(cl)+body_count,7*body_count])  
+
+    for i in range(0,len(phi_partials_values)):          
         phi_q[i,0:phi_partials_values[i].shape[1]]=phi_partials_values[i]
         
     for k in range(0,len(X)):
@@ -790,6 +792,51 @@ def calc_partials(X,cl):
             phi_q[len(cl)+k,k*7:k*7+7]=phi_p.T
         
     return phi_q
+
+#%%
+
+def calc_partials_new(SYS):
+    phi_partials_values=[]
+    X=SYS.bodies
+    cl=SYS.constraints
+    for i in cl:
+            if i.type.strip(" ' ") == 'CD':
+                CD_i=CD_PHI_partials(X,i)
+                phi_partials_values.append(CD_i)
+            if i.type.strip(" ' ") == 'DP1':
+                DP_1_i=DP1_PHI_partials(X,i)
+                phi_partials_values.append(DP_1_i)  
+                
+    phi_r=np.zeros([SYS.nc,3*SYS.nb])
+    phi_p=np.zeros([SYS.nc,4*SYS.nb])  
+    
+    for k in range(0,len(cl)):
+        i=cl[k]
+        if i.type.strip(" ' ") == 'CD':
+            CD_i_r=CD_PHI_partials_r(X,i)
+            CD_i_p=CD_PHI_partials_p(X,i)
+            # CD_i_r=CD_PHI_r(X,i)
+            # CD_i_p=CD_PHI_p(X,i)
+            if len(CD_i_r)==3:
+                phi_r[k,0:3]=CD_i_r
+                phi_p[k,0:4]=CD_i_p
+            elif len(CD_i_r)==6:
+                phi_r[k,0:6]=CD_i_r
+                phi_p[k,0:8]=CD_i_p
+            
+        if i.type.strip(" ' ") == 'DP1':
+            DP1_i_r=DP1_PHI_partials_r(X,i)
+            DP1_i_p=DP1_PHI_partials_p(X,i)
+            # DP_1_i=DP1_PHI_partials(X,i)
+            if len(DP1_i_r)==3:
+                phi_r[k,0:3]=DP1_i_r[0:3]
+                phi_p[k,0:4]=DP1_i_p[0:4]
+            elif len(DP1_i_r)==6:
+                phi_r[k,0:6]=DP1_i_r[0:6]
+                phi_p[k,0:8]=DP1_i_p[0:8]
+                
+                
+    return phi_r,phi_p
 
 #%%
 

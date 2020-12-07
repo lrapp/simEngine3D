@@ -102,8 +102,130 @@ def DP1_PHI_partials(X,C):
     else:
         # return np.concatenate((PHI_DP1_r_i,PHI_DP1_r_j,PHI_DP1_p_i,PHI_DP1_p_j),axis=1)        
         return np.concatenate((PHI_DP1_r_i,PHI_DP1_p_i,PHI_DP1_r_j,PHI_DP1_p_j),axis=1)
+#%%
+def DP1_PHI_partials_r(X,C):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+               
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    
+    A_i=build_A(I.q[3:])
+    A_j=build_A(J.q[3:])
+    
+    #Performe some transposes 
+    a_bar_i_T=np.transpose(a_bar_i)
+    a_bar_j_T=np.transpose(a_bar_j)
+    A_i_T=np.transpose(A_i)
+    A_j_T=np.transpose(A_j)
+
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    p_dot_i=I.p_dot
+    p_dot_j=J.p_dot
+
+    a_j=np.dot(A_j,a_bar_j)
+    a_i=np.dot(A_i,a_bar_i)
+    a_i_T=np.transpose(a_i)
+
+
+    a_j_T=np.transpose(a_j)
+    
+    
+    p_i.shape=(4,1)
+    a_bar_i.shape=(3,1)
+    B_i=build_B(p_i,a_bar_i)
+    B_j=build_B(p_j,a_bar_j)
+    
+    PHI_DP1_p_i=np.dot(a_j_T,B_i)
+    PHI_DP1_p_j=np.dot(a_i_T,B_j)   
+    
+    PHI_DP1_p_i.shape=(1,4)
+    PHI_DP1_p_j.shape=(1,4)
+    
+    PHI_DP1_r_i=np.array([0,0,0])
+    PHI_DP1_r_j=np.array([0,0,0])
+    
+    PHI_DP1_r_i.shape=(1,3)
+    PHI_DP1_r_j.shape=(1,3)    
+    
+    if J.ground=='True':
+        return PHI_DP1_r_i[0]
+    else:
+        # return np.concatenate((PHI_DP1_r_i,PHI_DP1_r_j,PHI_DP1_p_i,PHI_DP1_p_j),axis=1)        
+        return np.concatenate((PHI_DP1_r_i[0],PHI_DP1_r_j[0]))
 
 #%%
+def DP1_PHI_partials_p(X,C):
+    body_1=C.body_i_name
+    body_2=C.body_j_name
+    
+    for i in X:
+        if i.name == body_1:
+            i_index=X.index(i)
+        if i.name == body_2:
+            j_index=X.index(i) 
+               
+    I=X[i_index]
+    J=X[j_index]  
+    #Set a and A for bodies i and j
+    a_bar_i=C.a_bar_i
+    a_bar_j=C.a_bar_j
+    
+    A_i=build_A(I.q[3:])
+    A_j=build_A(J.q[3:])
+    
+    #Performe some transposes 
+    a_bar_i_T=np.transpose(a_bar_i)
+    a_bar_j_T=np.transpose(a_bar_j)
+    A_i_T=np.transpose(A_i)
+    A_j_T=np.transpose(A_j)
+
+    p_i=I.q[3:]
+    p_j=J.q[3:]
+    p_dot_i=I.p_dot
+    p_dot_j=J.p_dot
+
+    a_j=np.dot(A_j,a_bar_j)
+    a_i=np.dot(A_i,a_bar_i)
+    a_i_T=np.transpose(a_i)
+
+
+    a_j_T=np.transpose(a_j)
+    
+    
+    p_i.shape=(4,1)
+    a_bar_i.shape=(3,1)
+    B_i=build_B(p_i,a_bar_i)
+    B_j=build_B(p_j,a_bar_j)
+    
+    PHI_DP1_p_i=np.dot(a_j_T,B_i)
+    PHI_DP1_p_j=np.dot(a_i_T,B_j)   
+    
+    PHI_DP1_p_i.shape=(1,4)
+    PHI_DP1_p_j.shape=(1,4)
+    
+    PHI_DP1_r_i=np.array([0,0,0])
+    PHI_DP1_r_j=np.array([0,0,0])
+    
+    PHI_DP1_r_i.shape=(1,3)
+    PHI_DP1_r_j.shape=(1,3)    
+    
+    if J.ground=='True':
+        return PHI_DP1_p_i
+    else:
+        # return np.concatenate((PHI_DP1_r_i,PHI_DP1_r_j,PHI_DP1_p_i,PHI_DP1_p_j),axis=1)        
+        return np.concatenate((PHI_DP1_p_i,PHI_DP1_p_j),axis=1)
+    #%%
 def DP1_nue(X,C,dft):
 
     if C.name == "driving":
