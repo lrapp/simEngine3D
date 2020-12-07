@@ -100,7 +100,9 @@ def DP1_PHI_partials(X,C):
     if J.ground=='True':
         return np.concatenate((PHI_DP1_r_i,PHI_DP1_p_i),axis=1)
     else:
+        # return np.concatenate((PHI_DP1_r_i,PHI_DP1_r_j,PHI_DP1_p_i,PHI_DP1_p_j),axis=1)        
         return np.concatenate((PHI_DP1_r_i,PHI_DP1_p_i,PHI_DP1_r_j,PHI_DP1_p_j),axis=1)
+
 #%%
 def DP1_nue(X,C,dft):
 

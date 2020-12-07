@@ -68,6 +68,7 @@ def dynamic_analysis(SYS,t_start,t_step,t_end,file):
 
     return SYS
 
+#%%
 def inverse_dynamics_analysis(SYS,t_start,t_step,t_end,file):
     SYS.h=t_step
     num_steps=int((t_end-t_start) / t_step)

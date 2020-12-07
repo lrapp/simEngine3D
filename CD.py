@@ -149,10 +149,13 @@ def CD_PHI_partials(X,C):
     
     if J.ground=='True':
         r_v = np.concatenate((first[0],second[0]))
+        mult=1
     else:
         r_v= np.concatenate((first[0], third[0], second[0], fourth[0]))
+        # r_v= np.concatenate((first[0], second[0], third[0], fourth[0]))
+        mult=2
         
-    r_v.shape=(1,7)
+    r_v.shape=(1,7*mult)
     return r_v
     
 #%%

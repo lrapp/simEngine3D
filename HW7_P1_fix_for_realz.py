@@ -50,6 +50,6 @@ x=[]
 y=[]
 z=[]
 for i in range(0,len(SYS.outputs)):
-    x.append(SYS.outputs.r0[i][0][0])    
-    y.append(SYS.outputs.r0[i][1][0])
+    x.append(SYS.outputs.r[i][0][0])    
+    y.append(SYS.outputs.r[i][1][0])
     z.append(SYS.outputs.r0[i][2][0])    

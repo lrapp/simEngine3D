@@ -1,9 +1,8 @@
-import os 
 from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os 
 
 
 
@@ -13,12 +12,11 @@ t_step=0.01
 
 
 file_dir=os.getcwd()
-file_name="\\HW8_P1_revJoint.txt"
+file_name="\\Homework\\Original\\HW8_P2_input.txt"
 file=file_dir+file_name
 
 # file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
 SYS=sys()
-
 #%% set derivites of driving function specific to this problem
 def df(self):
     return 0 #no driving function here
@@ -28,7 +26,7 @@ def ddf(self):
     return 0 #no driving function here
  
 setattr(SYS,'df',df)     
-setattr(SYS,'ddf',ddf)         
+setattr(SYS,'ddf',ddf)      
 #%%
 tic=ttime.perf_counter()
 SYS=dynamic_analysis(SYS,t_start,t_step,t_end,file)
@@ -37,9 +35,9 @@ toc=ttime.perf_counter()
 elapsed_time=toc-tic
 print("time elapsed=",elapsed_time)
 
+#%%
 
-
-position=SYS.outputs["r"]
+position=SYS.outputs["r0"]
 x=[]
 y=[]
 z=[]

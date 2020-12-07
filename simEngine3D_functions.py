@@ -45,7 +45,7 @@ def build_JP(SYS):
 def build_P(SYS):
     P=np.zeros([SYS.nb,SYS.nb*4])
     for i in range(0,SYS.nb):
-        P[i,:]=np.transpose(SYS.bodies[i].q[3:])
+        P[i,i*4:4+i*4]=np.transpose(SYS.bodies[i].q[3:])
         
     return P
 
@@ -53,9 +53,9 @@ def build_P(SYS):
 def build_F(SYS):
     F=np.zeros([3*SYS.nb])
     for i in range(0,SYS.nb):
-        F[0+3*i:3+3*i]=SYS.bodies[i].gravity*SYS.bodies[i].mass
+        F[3*i:3+3*i]=SYS.bodies[i].gravity*SYS.bodies[i].mass
            
-    F.shape=(3,1)
+    F.shape=(3*SYS.nb,1)
     return F
 #%%
 def build_tau_hat(SYS):
@@ -147,143 +147,248 @@ def compute_accel(SYS):
     ddp=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]    
     lambda_p=unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
     lagrange=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+ 
+    ddr.shape=(1,SYS.nb*3)
+    ddp.shape=(1,SYS.nb*4)
+    lambda_p.shape=(1,SYS.nb)     
+    lagrange.shape=(1,SYS.nc)
     
-    columns_to_update=["ddr0","ddp0","lambda_p0","lagrange0"]    
-    values=[ddr,ddp,lambda_p,lagrange]
+    ddr=ddr[0]
+    ddp=ddp[0]
+    lambda_p=lambda_p[0]
+    lagrange=lagrange[0]
     
-    for i in range(0,len(columns_to_update)):
-        col=columns_to_update[i]
-        val=values[i]
+    col_names=["ddr","ddp","lambda_p","lagrange"]
+    update_val=[ddr,ddp,lambda_p,lagrange]
+                             
+
+
+    for i in range(0,len(col_names)):
+        col=col_names[i]
+        val=update_val[i].copy()
         s_n=SYS.outputs[col].copy()
         s_n[SYS.n]=val
         SYS.outputs[col]=s_n
     
-    # for i,j in update_dict.items():
-    #     col=i    
-    #     values_slice=j
-    #     s_n=SYS.outputs[col].copy()
-    #     s_n[SYS.n]=unknowns[values_slice]       
-        
-        # SYS.outputs[col]=s_n          
-    
-    # columns_to_update=["ddr0","ddp0","lambda_p0","lagrange0"]
-    # update_values=[slice(0,3*SYS.nb,1),slice(3*SYS.nb,3*SYS.nb+4*SYS.nb,1),slice(3*SYS.nb+4*SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb,1),slice(3*SYS.nb+4*SYS.nb+SYS.nb,3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc,1)]
-    # for i in range(0,len(columns_to_update)):
-    #     col=columns_to_update[i]
-    #     values_slice=update_values[i]
-    #     s_n=SYS.outputs[col].copy()
-    #     s_n[SYS.n]=unknowns[values_slice]       
-        
-    #     SYS.outputs[col]=s_n        
+     
         
 
-    # SYS.outputs.loc[SYS.n,"ddr0"]=unknowns[0:3*SYS.nb]
-    # SYS.outputs.loc[SYS.n,"ddp0"]=unknowns[3*SYS.nb:3*SYS.nb+4*SYS.nb]  
-    # SYS.outputs.loc[SYS.n,"lambda_p0"]= unknowns[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
-    # SYS.outputs.loc[SYS.n,"lagrange0"]=unknowns[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
     
 #%%
 
+# def build_DF(SYS,time_list):
+#     outputs=pd.DataFrame(time_list,columns=["time"])
+#     SYS.cols=["r","dr","ddr","p","dp","ddp","lambda_p","lagrange"]
+#     for j in range(0,SYS.nb+1):
+#         for i in SYS.cols:
+#             if "r" in i:
+#                 outputs[i+str(j)]=[np.zeros([3,1])]*len(outputs)
+#             if "p" in i:
+#                 outputs[i+str(j)]=[np.zeros([4,1])]*len(outputs)
+#             if "lambda_p" in i:
+#                 outputs[i+str(j)]=[np.zeros([SYS.nb,1])]*len(outputs)
+#             if "lagrange" in i:
+#                 outputs[i+str(j)]=[np.zeros([SYS.nc,1])]*len(outputs)
+            
+        
+#     return outputs
+
+#%%
 def build_DF(SYS,time_list):
     outputs=pd.DataFrame(time_list,columns=["time"])
     SYS.cols=["r","dr","ddr","p","dp","ddp","lambda_p","lagrange"]
-    for j in range(0,SYS.nb+1):
-        for i in SYS.cols:
-            if "r" in i:
-                outputs[i+str(j)]=[np.zeros([3,1])]*len(outputs)
-            if "p" in i:
-                outputs[i+str(j)]=[np.zeros([4,1])]*len(outputs)
-            if "lambda_p" in i:
-                outputs[i+str(j)]=[np.zeros([SYS.nb,1])]*len(outputs)
-            if "lagrange" in i:
-                outputs[i+str(j)]=[np.zeros([SYS.nc,1])]*len(outputs)
-            
+    for i in SYS.cols:
+        if "r" in i:
+            outputs[i]=[np.zeros([3*SYS.nb])]*len(outputs)
+        if "p" in i:
+            outputs[i]=[np.zeros([4*SYS.nb])]*len(outputs)
+        if "lambda_p" in i:
+            outputs[i]=[np.zeros([SYS.nb,1])]*len(outputs)
+        if "lagrange" in i:
+            outputs[i]=[np.zeros([SYS.nc,1])]*len(outputs)
         
     return outputs
 
-    
-#%%
+ #%%
 def update_level0(SYS):
     update_cols=[]
-    for i in range(0,SYS.nb+1):
-        update_i=[]
-        for j in SYS.cols:
-            if len(j) ==1:
-                update_i.append(j+str(i))
-        update_cols.append(update_i)
+    for j in SYS.cols:
+        if len(j) ==1:
+            update_cols.append(j)
+
+    r=np.zeros([SYS.nb*3])
+    p=np.zeros([SYS.nb*4])
+    for i in range(0,SYS.nb):
+        r_i=SYS.bodies[i].q[:3].copy()
+        r_i.shape=(1,3)
+        
+        p_i=SYS.bodies[i].q[3:].copy()
+        p_i.shape=(1,4)
+        
+        r[i*3:i*3+3]=r_i
+        p[i*4:i*4+4]=p_i
+
 
     for i in update_cols:
-        body=SYS.bodies[int(i[0][-1])]
-        for j in i:
-            if "r" in j:
-                r0_n=SYS.outputs[j].copy()
-                r0_n[SYS.n]=body.q[:3].copy()
-                SYS.outputs[j]=r0_n
+            if "r" in i:
+                r_n=SYS.outputs[i].copy()
+                r_n[SYS.n]=r
+                SYS.outputs[i]=r_n
                 # SYS.outputs.loc[SYS.n,j]=body.q[:3]
             else:
-                p0_n=SYS.outputs[j].copy()
-                p0_n[SYS.n]=body.q[3:].copy()
-                SYS.outputs[j]=p0_n                
-                # SYS.outputs.loc[SYS.n,j]=body.q[3:]
-
+                p_n=SYS.outputs[i].copy()
+                p_n[SYS.n]=p
+                SYS.outputs[i]=p_n                
+                # SYS.outputs.loc[SYS.n,j]=body.q[3:]   
 #%%
 def update_level1(SYS):
     update_cols=[]
-    for i in range(0,SYS.nb+1):
-        update_i=[]
-        for j in SYS.cols:
-            if len(j) ==2:
-                update_i.append(j+str(i))
-        update_cols.append(update_i)
+    for j in SYS.cols:
+        if len(j) ==2:
+            update_cols.append(j)
+            
+
+    dr=np.zeros([SYS.nb*3])
+    dp=np.zeros([SYS.nb*4])
+    for i in range(0,SYS.nb):
+        dr_i=SYS.bodies[i].r_dot.copy()
+        dr_i.shape=(1,3)
+        
+        dp_i=SYS.bodies[i].p_dot.copy()
+        dp_i.shape=(1,4)
+        
+        dr[i*3:i*3+3]=dr_i
+        dp[i*4:i*4+4]=dp_i
+            
 
     for i in update_cols:
-        body=SYS.bodies[int(i[0][-1])]
-        for j in i:
-            if "r" in j:
-                r_dot=body.r_dot
-                r_dot.shape=(3,1)
-                
-                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-                s_n[SYS.n]=r_dot      
-                SYS.outputs[j]=s_n
-                
-                # SYS.outputs.loc[SYS.n,j]=r_dot
+            if "r" in i:
+                dr_n=SYS.outputs[i].copy()
+                dr_n[SYS.n]=dr
+                SYS.outputs[i]=dr_n
+                # SYS.outputs.loc[SYS.n,j]=body.q[:3]
             else:
-                p_dot=body.p_dot
-                p_dot.shape=(4,1)      
-                
-                s_n=SYS.outputs[j].copy()
-                s_n[SYS.n]=p_dot      
-                SYS.outputs[j]=s_n
-                # SYS.outputs.loc[SYS.n,j]=body.p_dot   
-                
+                dp_n=SYS.outputs[i].copy()
+                dp_n[SYS.n]=dp
+                SYS.outputs[i]=dp_n                
+                # SYS.outputs.loc[SYS.n,j]=body.q[3:]   
 #%%
 def update_level2(SYS):
     update_cols=[]
-    for i in range(0,SYS.nb+1):
-        update_i=[]
-        for j in SYS.cols:
-            if len(j) ==3:
-                update_i.append(j+str(i))
-        update_cols.append(update_i)
+    for j in SYS.cols:
+        if len(j) ==3:
+            update_cols.append(j)
+           
+
+    ddr=np.zeros([SYS.nb*3])
+    ddp=np.zeros([SYS.nb*4])
+
+    
+    for i in range(0,SYS.nb):
+        ddr_i=SYS.bodies[i].r_ddot.copy()
+        ddr_i.shape=(1,3)
+        
+        ddp_i=SYS.bodies[i].p_ddot.copy()
+        ddp_i.shape=(1,4)
+        
+        ddr[i*3:i*3+3]=ddr_i
+        ddp[i*4:i*4+4]=ddp_i
+            
 
     for i in update_cols:
-        body=SYS.bodies[int(i[0][-1])]
-        for j in i:
-            if "r" in j:
-                r_ddot=body.r_ddot.copy()
-                r_ddot.shape=(3,1)
-                
-                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-                s_n[SYS.n]=r_ddot      
-                SYS.outputs[j]=s_n
-
+            if "r" in i:
+                ddr_n=SYS.outputs[i].copy()
+                ddr_n[SYS.n]=ddr
+                SYS.outputs[i]=ddr_n
+                # SYS.outputs.loc[SYS.n,j]=body.q[:3]
             else:
-                p_ddot=body.p_ddot.copy()
-                p_ddot.shape=(4,1)          
-                s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-                s_n[SYS.n]=p_ddot    
-                SYS.outputs[j]=s_n
+                ddp_n=SYS.outputs[i].copy()
+                ddp_n[SYS.n]=ddp
+                SYS.outputs[i]=ddp_n                
+                # SYS.outputs.loc[SYS.n,j]=body.q[3:]   
+                
+ #%%
+# def update_level0(SYS):
+#     update_cols=[]
+#     for i in range(0,SYS.nb+1):
+#         update_i=[]
+#         for j in SYS.cols:
+#             if len(j) ==1:
+#                 update_i.append(j+str(i))
+#         update_cols.append(update_i)
+
+#     for i in update_cols:
+#         body=SYS.bodies[int(i[0][-1])]
+#         for j in i:
+#             if "r" in j:
+#                 r0_n=SYS.outputs[j].copy()
+#                 r0_n[SYS.n]=body.q[:3].copy()
+#                 SYS.outputs[j]=r0_n
+#                 # SYS.outputs.loc[SYS.n,j]=body.q[:3]
+#             else:
+#                 p0_n=SYS.outputs[j].copy()
+#                 p0_n[SYS.n]=body.q[3:].copy()
+#                 SYS.outputs[j]=p0_n                
+#                 # SYS.outputs.loc[SYS.n,j]=body.q[3:]
+
+# #%%
+# def update_level1(SYS):
+#     update_cols=[]
+#     for i in range(0,SYS.nb+1):
+#         update_i=[]
+#         for j in SYS.cols:
+#             if len(j) ==2:
+#                 update_i.append(j+str(i))
+#         update_cols.append(update_i)
+
+#     for i in update_cols:
+#         body=SYS.bodies[int(i[0][-1])]
+#         for j in i:
+#             if "r" in j:
+#                 r_dot=body.r_dot
+#                 r_dot.shape=(3,1)
+                
+#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+#                 s_n[SYS.n]=r_dot      
+#                 SYS.outputs[j]=s_n
+                
+#                 # SYS.outputs.loc[SYS.n,j]=r_dot
+#             else:
+#                 p_dot=body.p_dot
+#                 p_dot.shape=(4,1)      
+                
+#                 s_n=SYS.outputs[j].copy()
+#                 s_n[SYS.n]=p_dot      
+#                 SYS.outputs[j]=s_n
+#                 # SYS.outputs.loc[SYS.n,j]=body.p_dot   
+                
+# #%%
+# def update_level2(SYS):
+#     update_cols=[]
+#     for i in range(0,SYS.nb+1):
+#         update_i=[]
+#         for j in SYS.cols:
+#             if len(j) ==3:
+#                 update_i.append(j+str(i))
+#         update_cols.append(update_i)
+
+#     for i in update_cols:
+#         body=SYS.bodies[int(i[0][-1])]
+#         for j in i:
+#             if "r" in j:
+#                 r_ddot=body.r_ddot.copy()
+#                 r_ddot.shape=(3,1)
+                
+#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+#                 s_n[SYS.n]=r_ddot      
+#                 SYS.outputs[j]=s_n
+
+#             else:
+#                 p_ddot=body.p_ddot.copy()
+#                 p_ddot.shape=(4,1)          
+#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
+#                 s_n[SYS.n]=p_ddot    
+#                 SYS.outputs[j]=s_n
                 
                              
 #%%
@@ -299,39 +404,77 @@ def BDF(SYS,n):
         beta_0 = 1
         alpha1 = -1
     
-        sol_1=SYS.outputs.iloc[n-1]        
+        r=SYS.outputs.iloc[n-1].r.copy()
+        r.shape=(3*SYS.nb,1)
+        p=SYS.outputs.iloc[n-1].p.copy()  
+        p.shape=(4*SYS.nb,1)   
+        
+        dr=SYS.outputs.iloc[n-1].dr.copy()
+        dp=SYS.outputs.iloc[n-1].dp.copy()      
+        
+        dr.shape=(3*SYS.nb,1)
+        dp.shape=(4*SYS.nb,1)          
+        
 
-        C_r_dot = -alpha1*np.array(sol_1.dr0)
-        C_r_dot.shape=(3,1)
-        C_r = -alpha1*np.array(sol_1.r0) + beta_0*h*C_r_dot
-        C_p_dot = -alpha1*np.array(sol_1.dp0)
-        C_p_dot.shape=(4,1)
-        C_p = -alpha1*np.array(sol_1.p0) + beta_0*h*C_p_dot
+
+        C_r_dot = -alpha1*np.array(dr)
+        C_r_dot.shape=(3*SYS.nb,1)
+        C_r = -alpha1*np.array(r) + beta_0*h*C_r_dot
+        C_p_dot = -alpha1*np.array(dp)
+        C_p_dot.shape=(4*SYS.nb,1)
+        C_p = -alpha1*np.array(p) + beta_0*h*C_p_dot
     else: #use BDF order 2
         beta_0 = 2/3
         alpha1 = -4/3
         alpha2 = 1/3
     
-        sol_1=SYS.outputs.iloc[n-1]               
-        sol_2=SYS.outputs.iloc[n-2]     
         
-        sol_2.dp0.shape=(4,1)
+        r1=SYS.outputs.iloc[n-1].r.copy()
+        r1.shape=(3*SYS.nb,1)
+        p1=SYS.outputs.iloc[n-1].p.copy()  
+        p1.shape=(4*SYS.nb,1)   
+        
+        dr1=SYS.outputs.iloc[n-1].dr.copy()
+        dp1=SYS.outputs.iloc[n-1].dp.copy()      
+        
+        dr1.shape=(3*SYS.nb,1)
+        dp1.shape=(4*SYS.nb,1)     
+        
+
+        
+        r2=SYS.outputs.iloc[n-2].r.copy()
+        r2.shape=(3*SYS.nb,1)
+        p2=SYS.outputs.iloc[n-2].p.copy()  
+        p2.shape=(4*SYS.nb,1)   
+        
+        dr2=SYS.outputs.iloc[n-2].dr.copy()
+        dp2=SYS.outputs.iloc[n-2].dp.copy()      
+        
+        dr2.shape=(3*SYS.nb,1)
+        dp2.shape=(4*SYS.nb,1)       
                   
-        C_r_dot = -alpha1*np.array(sol_1.dr0) - alpha2*np.array(sol_2.dr0)
-        C_r=-alpha1*np.array(sol_1.r0) - alpha2*np.array(sol_2.r0) + beta_0*h*C_r_dot
-        C_p_dot=-alpha1*np.array(sol_1.dp0) - alpha2*np.array(sol_2.dp0)
-        C_p_dot.shape=(4,1)        
-        C_p = -alpha1*np.array(sol_1.p0) - alpha2*np.array(sol_2.p0) + beta_0*h*C_p_dot 
+        C_r_dot = -alpha1*np.array(dr1) - alpha2*np.array(dr2)
+        C_r=-alpha1*np.array(r1) - alpha2*np.array(r2) + beta_0*h*C_r_dot
+        C_p_dot=-alpha1*np.array(dp1) - alpha2*np.array(dp2)
+        C_p_dot.shape=(4*SYS.nb,1)        
+        C_p = -alpha1*np.array(p1) - alpha2*np.array(p1) + beta_0*h*C_p_dot 
     
     
 
-    ddr=np.array(sol_1.ddr0)
-    ddp=np.array(sol_1.ddp0)
-    lambda_p=np.array(sol_1.lambda_p0)
-    lagrange=np.array(sol_1.lagrange0)
+
+    ddr=SYS.outputs.iloc[n-1].ddr.copy()
+    ddp=SYS.outputs.iloc[n-1].ddp.copy()      
+    lambda_p=SYS.outputs.iloc[n-1].lambda_p.copy()
+    lagrange=SYS.outputs.iloc[n-1].lagrange.copy()     
+
+     
+    # ddr=np.array(sol_1.ddr)
+    # ddp=np.array(sol_1.ddp)
+    # lambda_p=np.array(sol_1.lambda_p)
+    # lagrange=np.array(sol_1.lagrange)
     
-    ddr.shape=(3,1)
-    ddp.shape=(4,1)
+    ddr.shape=(3*SYS.nb,1)
+    ddp.shape=(4*SYS.nb,1)
     
     count=0
     error=1
@@ -341,7 +484,21 @@ def BDF(SYS,n):
         p=C_p + beta_0**2*h**2*ddp
         dp=C_p_dot + beta_0*h*ddp
         
-        update_bodies(SYS,r,p,dr,dp,ddr,ddp)
+        # update_bodies(SYS,r,p,dr,dp,ddr,ddp)
+        r.shape=(3*SYS.nb,1)
+        dr.shape=(3*SYS.nb,1)
+        p.shape=(4*SYS.nb,1)
+        dp.shape=(4*SYS.nb,1)        
+        ddr.shape=(3*SYS.nb,1)
+        ddp.shape=(4*SYS.nb,1)
+        
+        for i in range(0,SYS.nb):
+            SYS.bodies[i].q[:3]=r[3*i:3*i+3]
+            SYS.bodies[i].q[3:]=p[4*i:4*i+4]
+            SYS.bodies[i].r_dot=dr[3*i:3*i+3]
+            SYS.bodies[i].p_dot=dp[4*i:4*i+4]
+            SYS.bodies[i].r_ddot[:3]=ddr[3*i:3*i+3]        
+            SYS.bodies[i].p_ddot=ddp[4*i:4*i+4]          
 
         M=build_M(SYS)
         J_p = build_JP(SYS)
@@ -363,7 +520,11 @@ def BDF(SYS,n):
         PHI=np.array(PHI[0:SYS.nc]) #remove euler parameterization constraint        
         PHI.shape=(SYS.nc,1)
         
-        PHI_P=1/2*(p.T @ p) - 1/2           
+        PHI_P=np.zeros([SYS.nb,1])
+        for i in range(0,SYS.nb):
+            PHI_P[i,0]=1/2*(p[4*i:4*i+4].T @ p[4*i:4*i+4]) - 1/2   
+            
+        # PHI_P=1/2*(p.T @ p) - 1/2           
                   
         ddr.shape=(3*SYS.nb,1)
         ddp.shape=(4*SYS.nb,1)
@@ -396,16 +557,22 @@ def BDF(SYS,n):
 
         
                                   
-        error=np.linalg.norm(delta_z)                      
+        error=np.linalg.norm(delta_z)                  
         count=count+1   
     
     update_bodies(SYS,r,p,dr,dp,ddr,ddp) #update object with final values  
     update_level0(SYS) #update position in output object
     update_level1(SYS) #update velocity in output object
-    update_level2(SYS) #update velocity in output object    
+    update_level2(SYS) #update velocity in output object  
     
-            
-        
+    lambda_p_n=SYS.outputs["lambda_p"].copy()
+    lambda_p_n[SYS.n]=lambda_p
+    SYS.outputs["lambda_p"]=lambda_p_n
+    
+    lagrange_n=SYS.outputs["lagrange"].copy()
+    lagrange_n[SYS.n]=lagrange
+    SYS.outputs["lagrange"]=lagrange_n
+    
         #%%
 def update_bodies(SYS,r,p,dr,dp,ddr,ddp):
     r.shape=(3*SYS.nb,1)
@@ -609,13 +776,18 @@ def calc_partials(X,cl):
         if k.ground=='False':
             body_count=body_count+1
         
-    phi_q=np.zeros([len(cl)+body_count,7*body_count])        
+    phi_q=np.zeros([len(cl)+body_count,7*body_count])      
+    
     for i in range(0,len(phi_partials_values)):
-        phi_q[i,:]=phi_partials_values[i]
+        phi_q[i,0:phi_partials_values[i].shape[1]]=phi_partials_values[i]
         
-    p_i.shape=(4,1)
-    phi_p=np.concatenate((np.zeros([3,1]),p_i))
-    phi_q[-1,:]=phi_p.T
+    for k in range(0,len(X)):
+        body=X[k]
+        if body.ground=='False':
+            p_i=body.q[3:]
+            p_i.shape=(4,1)
+            phi_p=np.concatenate((np.zeros([3,1]),p_i))
+            phi_q[len(cl)+k,k*7:k*7+7]=phi_p.T
         
     return phi_q
 
