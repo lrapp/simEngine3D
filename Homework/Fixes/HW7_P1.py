@@ -1,8 +1,13 @@
-from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
 import numpy as np
-import os 
+import os
+#this file will be stored in "Homework/Fixes" so need to change dir to find simEngine3D
+os.chdir("..")
+os.chdir("..")
+
+from simEngine3D import *
+
 
 
 
@@ -13,6 +18,8 @@ t_step=0.001
 file_dir=os.getcwd()
 file_name="\\Homework\\Fixes\\revJoint_fix2.txt"
 file=file_dir+file_name
+
+
 
 # file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"
 
@@ -33,6 +40,7 @@ setattr(SYS,'df',df)
 setattr(SYS,'ddf',ddf)         
 #%%
 tic=ttime.perf_counter()
+print("Solving...")
 SYS=inverse_dynamics_analysis(SYS,t_start,t_step,t_end,file)
 toc=ttime.perf_counter()
 
