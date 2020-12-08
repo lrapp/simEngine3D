@@ -7,7 +7,7 @@ import os
 
 
 t_start=0
-t_end=5
+t_end=2
 t_step=0.001
 
 file_dir=os.getcwd()
@@ -46,10 +46,11 @@ time_list=np.arange(t_start,t_end,t_step)
 plt.plot(time_list,torque[:,0])
 
 #%%
+position=SYS.outputs.r
 x=[]
 y=[]
 z=[]
 for i in range(0,len(SYS.outputs)):
-    x.append(SYS.outputs.r[i][0][0])    
-    y.append(SYS.outputs.r[i][1][0])
-    z.append(SYS.outputs.r0[i][2][0])    
+    x.append(position[i][0])    
+    y.append(position[i][1])
+    z.append(position[i][2])    

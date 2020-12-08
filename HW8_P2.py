@@ -7,7 +7,7 @@ import os
 
 
 t_start=0
-t_end=100
+t_end=2
 t_step=0.001
 
 
@@ -63,12 +63,12 @@ plt.plot(time_list,z1)
 
 
 
-t=time_list[0::30]
-yyy=y[0::30]
-zzz=z[0::30]
+t=time_list[0::50]
+yyy=y[0::50]
+zzz=z[0::50]
 
-y2=y1[0::30]
-z2=z1[0::30]
+y2=y1[0::50]
+z2=z1[0::50]
 
 plt.figure()
 dist=[]
