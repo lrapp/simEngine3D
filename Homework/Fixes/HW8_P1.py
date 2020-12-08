@@ -1,4 +1,8 @@
 import os 
+
+os.chdir("..")
+os.chdir("..")
+
 from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
@@ -13,12 +17,10 @@ t_step=0.01
 
 
 file_dir=os.getcwd()
-file_name="\\HW8_P1_input.txt"
+file_name="\\Homework\\Fixes\\HW8_P1_input.txt"
 file=file_dir+file_name
 
-# file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
-SYS=sys()
-
+SYS=sys() #Create system object
 #%% set derivites of driving function specific to this problem
 def df(self):
     return 0 #no driving function here

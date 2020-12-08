@@ -62,9 +62,12 @@ def dynamic_analysis(SYS,t_start,t_step,t_end,file):
 
     compute_accel(SYS) #updates level2s (ddr and ddp)
     
+
     for i in range(1,len(time_list)):
         SYS.n=i
         BDF(SYS,SYS.n)
+
+
 
     return SYS
 

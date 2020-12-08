@@ -398,30 +398,33 @@ def BDF(SYS,n):
     max_iter=50
     h=SYS.h
     time=SYS.outputs.time[n]
+    nb=SYS.nb
+    nc=SYS.nc
+
 
     if n < 2: #use BDF order 1
     
         beta_0 = 1
         alpha1 = -1
     
+       
         r=SYS.outputs.iloc[n-1].r.copy()
-        r.shape=(3*SYS.nb,1)
+        r.shape=(3*nb,1)
         p=SYS.outputs.iloc[n-1].p.copy()  
-        p.shape=(4*SYS.nb,1)   
+        p.shape=(4*nb,1)   
         
         dr=SYS.outputs.iloc[n-1].dr.copy()
         dp=SYS.outputs.iloc[n-1].dp.copy()      
         
-        dr.shape=(3*SYS.nb,1)
-        dp.shape=(4*SYS.nb,1)          
-        
+        dr.shape=(3*nb,1)
+        dp.shape=(4*nb,1)          
 
 
         C_r_dot = -alpha1*np.array(dr)
-        C_r_dot.shape=(3*SYS.nb,1)
+        C_r_dot.shape=(3*nb,1)
         C_r = -alpha1*np.array(r) + beta_0*h*C_r_dot
         C_p_dot = -alpha1*np.array(dp)
-        C_p_dot.shape=(4*SYS.nb,1)
+        C_p_dot.shape=(4*nb,1)
         C_p = -alpha1*np.array(p) + beta_0*h*C_p_dot
     else: #use BDF order 2
         beta_0 = 2/3
@@ -430,33 +433,33 @@ def BDF(SYS,n):
     
         
         r1=SYS.outputs.iloc[n-1].r.copy()
-        r1.shape=(3*SYS.nb,1)
+        r1.shape=(3*nb,1)
         p1=SYS.outputs.iloc[n-1].p.copy()  
-        p1.shape=(4*SYS.nb,1)   
+        p1.shape=(4*nb,1)   
         
         dr1=SYS.outputs.iloc[n-1].dr.copy()
         dp1=SYS.outputs.iloc[n-1].dp.copy()      
         
-        dr1.shape=(3*SYS.nb,1)
-        dp1.shape=(4*SYS.nb,1)     
+        dr1.shape=(3*nb,1)
+        dp1.shape=(4*nb,1)     
         
 
         
         r2=SYS.outputs.iloc[n-2].r.copy()
-        r2.shape=(3*SYS.nb,1)
+        r2.shape=(3*nb,1)
         p2=SYS.outputs.iloc[n-2].p.copy()  
-        p2.shape=(4*SYS.nb,1)   
+        p2.shape=(4*nb,1)   
         
         dr2=SYS.outputs.iloc[n-2].dr.copy()
         dp2=SYS.outputs.iloc[n-2].dp.copy()      
         
-        dr2.shape=(3*SYS.nb,1)
-        dp2.shape=(4*SYS.nb,1)       
+        dr2.shape=(3*nb,1)
+        dp2.shape=(4*nb,1)       
                   
         C_r_dot = -alpha1*np.array(dr1) - alpha2*np.array(dr2)
         C_r=-alpha1*np.array(r1) - alpha2*np.array(r2) + beta_0*h*C_r_dot
         C_p_dot=-alpha1*np.array(dp1) - alpha2*np.array(dp2)
-        C_p_dot.shape=(4*SYS.nb,1)        
+        C_p_dot.shape=(4*nb,1)        
         C_p = -alpha1*np.array(p1) - alpha2*np.array(p1) + beta_0*h*C_p_dot 
     
     
@@ -467,14 +470,9 @@ def BDF(SYS,n):
     lambda_p=SYS.outputs.iloc[n-1].lambda_p.copy()
     lagrange=SYS.outputs.iloc[n-1].lagrange.copy()     
 
-     
-    # ddr=np.array(sol_1.ddr)
-    # ddp=np.array(sol_1.ddp)
-    # lambda_p=np.array(sol_1.lambda_p)
-    # lagrange=np.array(sol_1.lagrange)
-    
-    ddr.shape=(3*SYS.nb,1)
-    ddp.shape=(4*SYS.nb,1)
+   
+    ddr.shape=(3*nb,1)
+    ddp.shape=(4*nb,1)
     
     count=0
     error=1
@@ -485,14 +483,14 @@ def BDF(SYS,n):
         dp=C_p_dot + beta_0*h*ddp
         
         # update_bodies(SYS,r,p,dr,dp,ddr,ddp)
-        r.shape=(3*SYS.nb,1)
-        dr.shape=(3*SYS.nb,1)
-        p.shape=(4*SYS.nb,1)
-        dp.shape=(4*SYS.nb,1)        
-        ddr.shape=(3*SYS.nb,1)
-        ddp.shape=(4*SYS.nb,1)
+        r.shape=(3*nb,1)
+        dr.shape=(3*nb,1)
+        p.shape=(4*nb,1)
+        dp.shape=(4*nb,1)        
+        ddr.shape=(3*nb,1)
+        ddp.shape=(4*nb,1)
         
-        for i in range(0,SYS.nb):
+        for i in range(0,nb):
             SYS.bodies[i].q[:3]=r[3*i:3*i+3]
             SYS.bodies[i].q[3:]=p[4*i:4*i+4]
             SYS.bodies[i].r_dot=dr[3*i:3*i+3]
@@ -500,50 +498,42 @@ def BDF(SYS,n):
             SYS.bodies[i].r_ddot[:3]=ddr[3*i:3*i+3]        
             SYS.bodies[i].p_ddot=ddp[4*i:4*i+4]          
 
+
+
         M=build_M(SYS)
         J_p = build_JP(SYS)
         P = build_P(SYS)
         F = build_F(SYS)
-
         tau_hat=build_tau_hat(SYS)
+        
 
-        
-                
-        # SYS.phi_q=calc_partials(SYS.bodies,SYS.constraints)    
-        # phi_r=SYS.phi_q[:,0:3*SYS.nb]
-        # phi_p=SYS.phi_q[:,SYS.nb*3:]
-        
-        # phi_r=phi_r[0:SYS.nc] #don't consider euler constraint
-        # phi_p=phi_p[0:SYS.nc]    
-        
         phi_r,phi_p = calc_partials_new(SYS)
         
         PHI=calc_phi(SYS.bodies,SYS.constraints,time)
         PHI=np.array(PHI[0:SYS.nc]) #remove euler parameterization constraint        
         PHI.shape=(SYS.nc,1)
         
-        PHI_P=np.zeros([SYS.nb,1])
-        for i in range(0,SYS.nb):
+        PHI_P=np.zeros([nb,1])
+        for i in range(0,nb):
             PHI_P[i,0]=1/2*(p[4*i:4*i+4].T @ p[4*i:4*i+4]) - 1/2   
-            
-        # PHI_P=1/2*(p.T @ p) - 1/2           
                   
-        ddr.shape=(3*SYS.nb,1)
-        ddp.shape=(4*SYS.nb,1)
-        lambda_p.shape=(SYS.nb,1)
+                  
+        ddr.shape=(3*nb,1)
+        ddp.shape=(4*nb,1)
+        lambda_p.shape=(nb,1)
         lagrange.shape=(SYS.nc,1)
-        g=np.zeros([8*SYS.nb+SYS.nc,1])
-        g[0:3*SYS.nb]=M @ ddr + phi_r.T @ lagrange - F
-        g[3*SYS.nb:3*SYS.nb+4*SYS.nb] =J_p @ ddp + phi_p.T @ lagrange + P.T @ lambda_p - tau_hat
-        g[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]=PHI_P/(beta_0**2*h**2)
-        g[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]=PHI/(beta_0**2*h**2)
+        g=np.zeros([8*nb+SYS.nc,1])
+        g[0:3*nb]=M @ ddr + phi_r.T @ lagrange - F
+        g[3*nb:3*nb+4*nb] =J_p @ ddp + phi_p.T @ lagrange + P.T @ lambda_p - tau_hat
+        g[3*nb+4*nb:3*nb+4*nb+nb]=PHI_P/(beta_0**2*h**2)
+        g[3*nb+4*nb+nb:3*nb+4*nb+nb+SYS.nc]=PHI/(beta_0**2*h**2)
         
         
         if count == 0:
-            PSI_1=np.concatenate((M,np.zeros((3*SYS.nb,4*SYS.nb)),np.zeros((3*SYS.nb,SYS.nb)),phi_r.T),axis=1)
-            PSI_2=np.concatenate((np.zeros((4*SYS.nb,3*SYS.nb)),J_p,P.T,phi_p.T),axis=1)
-            PSI_3=np.concatenate((np.zeros((SYS.nb,3*SYS.nb)),P,np.zeros((SYS.nb,SYS.nb)),np.zeros((SYS.nb,SYS.nc))),axis=1)
-            PSI_4=np.concatenate((phi_r,phi_p,np.zeros((SYS.nc,SYS.nb)),np.zeros((SYS.nc,SYS.nc))),axis=1)            
+            PSI_1=np.concatenate((M,np.zeros((3*nb,4*nb)),np.zeros((3*nb,nb)),phi_r.T),axis=1)
+            PSI_2=np.concatenate((np.zeros((4*nb,3*nb)),J_p,P.T,phi_p.T),axis=1)
+            PSI_3=np.concatenate((np.zeros((nb,3*nb)),P,np.zeros((nb,nb)),np.zeros((nb,SYS.nc))),axis=1)
+            PSI_4=np.concatenate((phi_r,phi_p,np.zeros((SYS.nc,nb)),np.zeros((SYS.nc,SYS.nc))),axis=1)            
                 
             PSI=np.concatenate((PSI_1,PSI_2,PSI_3,PSI_4),axis=0)
             
@@ -551,21 +541,23 @@ def BDF(SYS,n):
 
         delta_z=-np.matmul(np.linalg.inv(PSI),g) 
         
-        ddr=ddr+delta_z[0:3*SYS.nb]
-        ddp=ddp+delta_z[3*SYS.nb:3*SYS.nb+4*SYS.nb]
-        lambda_p=lambda_p+delta_z[3*SYS.nb+4*SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb]
-        lagrange=lagrange+delta_z[3*SYS.nb+4*SYS.nb+SYS.nb:3*SYS.nb+4*SYS.nb+SYS.nb+SYS.nc]
+        ddr=ddr+delta_z[0:3*nb]
+        ddp=ddp+delta_z[3*nb:3*nb+4*nb]
+        lambda_p=lambda_p+delta_z[3*nb+4*nb:3*nb+4*nb+nb]
+        lagrange=lagrange+delta_z[3*nb+4*nb+nb:3*nb+4*nb+nb+SYS.nc]
         
 
         
                                   
         error=np.linalg.norm(delta_z)                  
         count=count+1   
-    
+        
+
     update_bodies(SYS,r,p,dr,dp,ddr,ddp) #update object with final values  
     update_level0(SYS) #update position in output object
     update_level1(SYS) #update velocity in output object
     update_level2(SYS) #update velocity in output object  
+
     
     lambda_p_n=SYS.outputs["lambda_p"].copy()
     lambda_p_n[SYS.n]=lambda_p
