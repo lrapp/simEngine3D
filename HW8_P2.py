@@ -7,7 +7,7 @@ import os
 
 
 t_start=0
-t_end=10
+t_end=100
 t_step=0.001
 
 
@@ -91,5 +91,9 @@ for i in range(0,len(t)):
     line.remove()
     line=line_2.pop()
     line.remove()
-    
+    #%%
+#plot x,y,z for body 2 - position vs time
+#plt.plot(time_list,x1)
+# plt.plot(time_list,y1)
+# plt.plot(time_list,z1)
     
