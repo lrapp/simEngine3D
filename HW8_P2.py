@@ -12,7 +12,7 @@ t_step=0.001
 
 
 file_dir=os.getcwd()
-file_name="\\Homework\\Original\\HW8_P2_input.txt"
+file_name="\\Homework\\Fixes\\HW8_P2_input.txt"
 file=file_dir+file_name
 
 # file="C:\\Users\\Logan\\Desktop\\simEngine3D\\HW8_P1_revJoint.txt"
