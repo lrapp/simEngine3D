@@ -1,27 +1,22 @@
+import sys
+sys.path.append('../..')
 import time as ttime
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-#this file will be stored in "Homework/Fixes" so need to change dir to find simEngine3D
-os.chdir("..")
-os.chdir("..")
-
 from simEngine3D import *
 
 
 
 
 t_start=0
-t_end=2
+t_end=10
 t_step=0.001
 
 file_dir=os.getcwd()
-file_name="\\Homework\\Fixes\\revJoint_fix2.txt"
+file_name="\\revJoint_fix2.txt"
 file=file_dir+file_name
 
-
-
-# file="C:\\Users\\Logan\\Desktop\\simEngine3D\\Homework\\Fixes\\revJoint_fix2.txt"
 
 #create system object
 SYS=sys()
@@ -51,8 +46,15 @@ print("time elapsed=",elapsed_time)
 torque=SYS.torque
 
 time_list=np.arange(t_start,t_end,t_step)
-plt.plot(time_list,torque[:,0])
-
+fig=plt.figure()
+plt.rc('xtick',labelsize=20)
+plt.rc('ytick',labelsize=20)
+plt.xlabel('Time (s)',size=20)
+plt.ylabel('Reaction Torque (Nm)',size=20)
+plt.plot(time_list,torque[:,0],label='x')
+plt.plot(time_list,torque[:,1],label='y')
+plt.plot(time_list,torque[:,2],label='z')
+plt.legend()
 #%%
 position=SYS.outputs.r
 x=[]

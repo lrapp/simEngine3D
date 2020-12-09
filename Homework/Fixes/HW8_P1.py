@@ -39,7 +39,8 @@ toc=ttime.perf_counter()
 elapsed_time=toc-tic
 print("time elapsed=",elapsed_time)
 
-
+#%% Plot positions
+time_list=np.arange(t_start,t_end,t_step)
 
 position=SYS.outputs["r"]
 x=[]
@@ -50,7 +51,72 @@ for i in position:
     y.append(i[1])
     z.append(i[2])
     
+plt.figure()    
+plt.xlim(0,10)
+plt.title("HW8_P1 O' Position")
+plt.xlabel("Time (s)")
+plt.ylabel("Position")
+plt.plot(time_list,x,label="x")
+plt.plot(time_list,y,label="y")
+plt.plot(time_list,z,label="z")
+plt.legend()
     
+
+#%%    Plot velocities
+dr=SYS.outputs["dr"]
+
+dx=[]
+dy=[]
+dz=[]
+for i in dr:
+    dx.append(i[0])
+    dy.append(i[1])
+    dz.append(i[2])
     
-time_list=np.arange(t_start,t_end,t_step)
-plt.plot(time_list,y)
+plt.figure()    
+plt.xlim(0,10)
+plt.title("HW8_P1 O' velocities")
+plt.xlabel("Time (s)")
+plt.ylabel("Omega (rad/s)")
+plt.plot(time_list,dx,label="dx")
+plt.plot(time_list,dy,label="dy")
+plt.plot(time_list,dz,label="dz")
+plt.legend()
+    
+#%%
+ddr=SYS.outputs["ddr"]
+ddx=[]
+ddy=[]
+ddz=[]
+for i in ddr:
+    ddx.append(i[0])
+    ddy.append(i[1])
+    ddz.append(i[2])
+
+plt.figure()    
+plt.xlim(0,10)
+plt.title("HW8_P1 O' Accelerations")
+plt.xlabel("Time (s)")
+plt.ylabel("Acceleration (rad/s^2)")
+plt.plot(time_list,ddx,label="ddx")
+plt.plot(time_list,ddy,label="ddy")
+plt.plot(time_list,ddz,label="ddz")
+plt.legend()
+
+
+#%%
+plt.figure()
+for i in range(0,len(time_list)):
+    plt.xlim(-6,6)
+    plt.ylim(-6,6)
+    yy=[0,y[i]*2]
+    zz=[0,z[i]*2]
+    
+    line_1=plt.plot(yy,zz,c='b')
+    scat_1=plt.plot(y[i],z[i],'o',c='b')
+
+    plt.pause(0.01)
+    plt.title("time=",str(round(time_list[i],2)))
+    line=line_1.pop()
+    line.remove()    
+
