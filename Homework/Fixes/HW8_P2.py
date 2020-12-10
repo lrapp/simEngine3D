@@ -8,9 +8,21 @@ import numpy as np
 
 
 
-t_start=0
-t_end=10
-t_step=0.001
+if any('SPYDER' in name for name in os.environ):
+    print("in Spyder, inputs are entered here, not in command line")
+    t_start=0
+    t_end=1
+    t_step=0.001    
+    
+else:
+    print("enter end time of simulation and hit enter. \nExample: 10  (takes ~266 seconds)")
+    t_end=float(input())
+    print("enter stepsize and hit enter. \nExample: 0.001")
+    t_step=float(input())
+
+print("\n")
+print("inputs:","t_end=",str(t_end),",","t_step=",str(t_step))
+t_start=0      
 
 
 file_dir=os.getcwd()
@@ -284,13 +296,16 @@ y_2_sparse=y2[0::spare_index]
 z_2_sparse=z2[0::spare_index]
 
 fig=plt.figure()
-plt.xlabel('y position')
-plt.ylabel('z position')
+plt.rc('xtick',labelsize=20)
+plt.rc('ytick',labelsize=20)
+plt.xlabel('y position',size=20)
+plt.ylabel('z position',size=20)
 dist=[]
 
 for i in range(0,len(t)):
     plt.xlim(-6,6)
     plt.ylim(-6,6)
+    plt.title("time="+str(round(t[i],1)))
     yy=[0,y_1_sparse[i]*2]
     zz=[0,z_1_sparse[i]*2]
     
