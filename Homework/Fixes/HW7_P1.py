@@ -7,11 +7,23 @@ import os
 from simEngine3D import *
 
 
+if any('SPYDER' in name for name in os.environ):
+    print("in Spyder, inputs are entered here, not in command line")
+    t_start=0
+    t_end=1
+    t_step=0.001    
+    
+else:
+    print("enter end time of simulation and hit enter. \nExample: 10  (takes ~266 seconds)")
+    t_end=float(input())
+    print("enter stepsize and hit enter. \nExample: 0.001")
+    t_step=float(input())
+
+print("\n")
+print("inputs:","t_end=",str(t_end),",","t_step=",str(t_step))
 
 
 t_start=0
-t_end=10
-t_step=0.001
 
 file_dir=os.getcwd()
 file_name="\\revJoint_fix2.txt"
@@ -47,6 +59,7 @@ torque=SYS.torque
 
 time_list=np.arange(t_start,t_end,t_step)
 fig=plt.figure()
+
 plt.rc('xtick',labelsize=20)
 plt.rc('ytick',labelsize=20)
 plt.xlabel('Time (s)',size=20)
@@ -55,6 +68,7 @@ plt.plot(time_list,torque[:,0],label='x')
 plt.plot(time_list,torque[:,1],label='y')
 plt.plot(time_list,torque[:,2],label='z')
 plt.legend()
+plt.show()
 #%%
 position=SYS.outputs.r
 x=[]
@@ -64,3 +78,14 @@ for i in range(0,len(SYS.outputs)):
     x.append(position[i][0])    
     y.append(position[i][1])
     z.append(position[i][2])    
+    
+    
+#this checks to see if file is running in Spyder or from command line
+#if in command line, it will wait for input from user before closing figures
+if any('SPYDER' in name for name in os.environ):
+    print("in Spyder, don't need to hold figures open")
+else:
+    print("press enter to continue")
+    input()
+
+           

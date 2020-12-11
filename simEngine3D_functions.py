@@ -5,17 +5,6 @@ import pandas as pd
 from CD import *
 from DP1 import *
 #%%
-
-# def df(t):
-#     return -np.pi/2. * np.sin(2.* t) * np.cos(np.pi/4.* np.cos(2.* t))
-#     # return 0
-
-# def ddf(t):
-#     return -np.pi/4. * (4.* np.cos(2.* t) * np.cos(np.pi/4.* np.cos(2* t)) + \
-#             np.pi * np.sin(2.* t) * np.sin(2.* t) * np.sin(np.pi/4.* np.cos(2.* t)))
-#     # return 0
-    
-#%%
 # calculate a_tilde
 def tilde(a):
     ax, ay, az = float(a[0]), float(a[1]), float(a[2])
@@ -307,90 +296,7 @@ def update_level2(SYS):
                 SYS.outputs[i]=ddp_n                
                 # SYS.outputs.loc[SYS.n,j]=body.q[3:]   
                 
- #%%
-# def update_level0(SYS):
-#     update_cols=[]
-#     for i in range(0,SYS.nb+1):
-#         update_i=[]
-#         for j in SYS.cols:
-#             if len(j) ==1:
-#                 update_i.append(j+str(i))
-#         update_cols.append(update_i)
-
-#     for i in update_cols:
-#         body=SYS.bodies[int(i[0][-1])]
-#         for j in i:
-#             if "r" in j:
-#                 r0_n=SYS.outputs[j].copy()
-#                 r0_n[SYS.n]=body.q[:3].copy()
-#                 SYS.outputs[j]=r0_n
-#                 # SYS.outputs.loc[SYS.n,j]=body.q[:3]
-#             else:
-#                 p0_n=SYS.outputs[j].copy()
-#                 p0_n[SYS.n]=body.q[3:].copy()
-#                 SYS.outputs[j]=p0_n                
-#                 # SYS.outputs.loc[SYS.n,j]=body.q[3:]
-
-# #%%
-# def update_level1(SYS):
-#     update_cols=[]
-#     for i in range(0,SYS.nb+1):
-#         update_i=[]
-#         for j in SYS.cols:
-#             if len(j) ==2:
-#                 update_i.append(j+str(i))
-#         update_cols.append(update_i)
-
-#     for i in update_cols:
-#         body=SYS.bodies[int(i[0][-1])]
-#         for j in i:
-#             if "r" in j:
-#                 r_dot=body.r_dot
-#                 r_dot.shape=(3,1)
-                
-#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-#                 s_n[SYS.n]=r_dot      
-#                 SYS.outputs[j]=s_n
-                
-#                 # SYS.outputs.loc[SYS.n,j]=r_dot
-#             else:
-#                 p_dot=body.p_dot
-#                 p_dot.shape=(4,1)      
-                
-#                 s_n=SYS.outputs[j].copy()
-#                 s_n[SYS.n]=p_dot      
-#                 SYS.outputs[j]=s_n
-#                 # SYS.outputs.loc[SYS.n,j]=body.p_dot   
-                
-# #%%
-# def update_level2(SYS):
-#     update_cols=[]
-#     for i in range(0,SYS.nb+1):
-#         update_i=[]
-#         for j in SYS.cols:
-#             if len(j) ==3:
-#                 update_i.append(j+str(i))
-#         update_cols.append(update_i)
-
-#     for i in update_cols:
-#         body=SYS.bodies[int(i[0][-1])]
-#         for j in i:
-#             if "r" in j:
-#                 r_ddot=body.r_ddot.copy()
-#                 r_ddot.shape=(3,1)
-                
-#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-#                 s_n[SYS.n]=r_ddot      
-#                 SYS.outputs[j]=s_n
-
-#             else:
-#                 p_ddot=body.p_ddot.copy()
-#                 p_ddot.shape=(4,1)          
-#                 s_n=SYS.outputs[j].copy() #foolishly updated pandas so I had to change indexing method
-#                 s_n[SYS.n]=p_ddot    
-#                 SYS.outputs[j]=s_n
-                
-                             
+           
 #%%
 def BDF(SYS,n):
     

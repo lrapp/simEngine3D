@@ -1,8 +1,6 @@
-import os 
-
-os.chdir("..")
-os.chdir("..")
-
+import sys
+sys.path.append('../..')
+import os
 from simEngine3D import *
 import time as ttime
 import matplotlib.pyplot as plt
@@ -11,13 +9,27 @@ import numpy as np
 
 
 
-t_start=0 
-t_end=10
-t_step=0.01
+
+
+if any('SPYDER' in name for name in os.environ):
+    print("in Spyder, inputs are entered here, not in command line")
+    t_start=0
+    t_end=10
+    t_step=0.01   
+    
+else:
+    print("enter end time of simulation and hit enter. \nExample: 10  (takes ~16.5 seconds)")
+    t_end=float(input())
+    print("enter stepsize and hit enter. \nExample: 0.01")
+    t_step=float(input())
+
+print("\n")
+print("inputs:","t_end=",str(t_end),",","t_step=",str(t_step))
+t_start=0      
 
 
 file_dir=os.getcwd()
-file_name="\\Homework\\Fixes\\HW8_P1_input.txt"
+file_name="\\HW8_P1_input.txt"
 file=file_dir+file_name
 
 SYS=sys() #Create system object
@@ -105,18 +117,39 @@ plt.legend()
 
 
 #%%
+
+
+if t_step <= 0.01:
+    spare_index=10
+else:
+    spare_index=5
+    
+t=time_list[0::spare_index]
+y_1_sparse=y[0::spare_index]
+z_1_sparse=z[0::spare_index]
+
+
 plt.figure()
-for i in range(0,len(time_list)):
+for i in range(0,len(t)):
     plt.xlim(-6,6)
     plt.ylim(-6,6)
-    yy=[0,y[i]*2]
-    zz=[0,z[i]*2]
+    yy=[0,y_1_sparse[i]*2]
+    zz=[0,z_1_sparse[i]*2]
     
     line_1=plt.plot(yy,zz,c='b')
-    scat_1=plt.plot(y[i],z[i],'o',c='b')
+    scat_1=plt.plot(y_1_sparse[i],z_1_sparse[i],'o',c='b')
 
     plt.pause(0.01)
-    plt.title("time=",str(round(time_list[i],2)))
+    plt.title("time="+str(round(t[i],1)))
     line=line_1.pop()
     line.remove()    
+    
+    
+#this checks to see if file is running in Spyder or from command line
+#if in command line, it will wait for input from user before closing figures
+if any('SPYDER' in name for name in os.environ):
+    print("in Spyder, don't need to hold figures open")
+else:
+    print("press enter to continue")
+    input()
 

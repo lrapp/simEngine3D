@@ -157,7 +157,7 @@ def data_file(file):
     return body_ob_list #returns list of bodies
 #%%
 class constraint():
-    """Object that holds information about bodies"""
+    """Object that holds information about constraints"""
     def __init__(self):
         self.name = ""
         self.ID = ""    

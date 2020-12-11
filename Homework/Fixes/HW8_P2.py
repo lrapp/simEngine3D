@@ -287,7 +287,11 @@ z1=z_list[0]
 y2=y_list[1]
 z2=z_list[1]
 
-spare_index=50
+if t_step <= 0.001:
+    spare_index=50
+else:
+    spare_index=20
+    
 t=time_list[0::spare_index]
 y_1_sparse=y1[0::spare_index]
 z_1_sparse=z1[0::spare_index]
