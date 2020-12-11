@@ -1,3 +1,5 @@
+# # Contains PHI, Partials, nu, and gamma functions for the Dot Product 2 constraint
+
 import numpy as np
 from simEngine3D_functions import tilde
 

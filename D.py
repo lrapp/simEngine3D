@@ -1,3 +1,5 @@
+# Contains PHI, Partials, nu, and gamma functions for the distance constraint
+
 import numpy as np
 #%%
 # calculate a_tilde

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 30 11:04:04 2020
-
+Contains PHI, Partials, nu, and gamma functions for the coordinate difference constraint
 @author: Logan
 """
 import numpy as np

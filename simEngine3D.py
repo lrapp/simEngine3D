@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Nov 16 14:27:42 2020
-Restarting with pieces of my SimEngine3D from homework.  Starting over here for a clean slate.
+Restarting with pieces of my SimEngine3D from homework.  
 
-@author: Logan
+@author: Logan Rapp
 """
 import os
 # os.chdir("C:\\Users\\Logan\\Desktop\\simEngine3D")

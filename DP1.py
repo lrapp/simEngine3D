@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 19 10:58:02 2020
-
+# Contains PHI, Partials, nu, and gamma functions for the Dot Product 1 constraint
 @author: Logan
 """
 
