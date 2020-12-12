@@ -14,7 +14,7 @@ if any('SPYDER' in name for name in os.environ):
     t_step=0.001    
     
 else:
-    print("enter end time of simulation and hit enter. \nExample: 10  (takes ~266 seconds)")
+    print("enter end time of simulation and hit enter. \nExample: 10  (takes ~123 seconds)")
     t_end=float(input())
     print("enter stepsize and hit enter. \nExample: 0.001")
     t_step=float(input())
